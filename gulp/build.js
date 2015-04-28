@@ -9,7 +9,8 @@ var $ = require('gulp-load-plugins')({
 module.exports = function(options) {
   gulp.task('partials', function () {
     return gulp.src([
-      options.src + '/**/*.html',
+      options.src + '/components/**/*.html',
+      options.src + '/modules/**/*.html',
       options.tmp + '/serve/app/**/*.html'
     ])
       .pipe($.minifyHtml({
@@ -19,7 +20,7 @@ module.exports = function(options) {
       }))
       .pipe($.angularTemplatecache('templateCacheHtml.js', {
         module: 'totemDashboard',
-        root: 'app'
+        root: 'components'
       }))
       .pipe(gulp.dest(options.tmp + '/partials/'));
   });
@@ -37,7 +38,7 @@ module.exports = function(options) {
     var cssFilter = $.filter('**/*.css');
     var assets;
 
-    return gulp.src(options.tmp + '/serve/*.html')
+    return gulp.src(options.tmp + '/serve/**/*.html')
       .pipe($.inject(partialsInjectFile, partialsInjectOptions))
       .pipe(assets = $.useref.assets())
       .pipe($.rev())
