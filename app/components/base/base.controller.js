@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('totemDashboard')
-  .controller('MainCtrl', function ($scope) {
+  .controller('BaseCtrl', function ($scope) {
     $scope.awesomeThings = [
       {
         'title': 'AngularJS',

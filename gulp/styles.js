@@ -14,14 +14,14 @@ module.exports = function(options) {
     };
 
     var injectFiles = gulp.src([
-      options.src + '/app/**/*.scss',
-      '!' + options.src + '/app/index.scss',
-      '!' + options.src + '/app/vendor.scss'
+      options.src + '/**/*.scss',
+      '!' + options.src + '/assets/styles/main.scss',
+      '!' + options.src + '/assets/styles/vendor.scss'
     ], { read: false });
 
     var injectOptions = {
       transform: function(filePath) {
-        filePath = filePath.replace(options.src + '/app/', '');
+        filePath = filePath.replace(options.src + '/assets/', '');
         return '@import \'' + filePath + '\';';
       },
       starttag: '// injector',
@@ -29,12 +29,12 @@ module.exports = function(options) {
       addRootSlash: false
     };
 
-    var indexFilter = $.filter('index.scss');
+    var indexFilter = $.filter('main.scss');
     var vendorFilter = $.filter('vendor.scss');
 
     return gulp.src([
-      options.src + '/app/index.scss',
-      options.src + '/app/vendor.scss'
+      options.src + '/assets/styles/main.scss',
+      options.src + '/assets/styles/vendor.scss'
     ])
       .pipe(indexFilter)
       .pipe($.inject(injectFiles, injectOptions))
@@ -46,7 +46,7 @@ module.exports = function(options) {
       .pipe($.sass(sassOptions)).on('error', options.errorHandler('Sass'))
       .pipe($.autoprefixer()).on('error', options.errorHandler('Autoprefixer'))
       .pipe($.sourcemaps.write())
-      .pipe(gulp.dest(options.tmp + '/serve/app/'))
+      .pipe(gulp.dest(options.tmp + '/serve/styles/'))
       .pipe(browserSync.reload({ stream: true }));
   });
 };

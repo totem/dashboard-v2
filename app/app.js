@@ -5,8 +5,8 @@ angular.module('totemDashboard', ['ngAnimate', 'ngSanitize', 'ui.router', 'ui.bo
     $stateProvider
       .state('home', {
         url: '/',
-        templateUrl: 'app/main/main.html',
-        controller: 'MainCtrl'
+        templateUrl: 'components/base/base.html',
+        controller: 'BaseCtrl'
       });
 
     $urlRouterProvider.otherwise('/');

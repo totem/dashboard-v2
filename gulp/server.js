@@ -16,7 +16,7 @@ module.exports = function(options) {
     var routes = null;
     if(baseDir === options.src || (util.isArray(baseDir) && baseDir.indexOf(options.src) !== -1)) {
       routes = {
-        '/bower_components': 'bower_components'
+        '/app/bower': 'app/bower'
       };
     }
 

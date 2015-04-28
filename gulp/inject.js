@@ -9,14 +9,15 @@ var wiredep = require('wiredep').stream;
 module.exports = function(options) {
   gulp.task('inject', ['scripts', 'styles'], function () {
     var injectStyles = gulp.src([
-      options.tmp + '/serve/app/**/*.css',
-      '!' + options.tmp + '/serve/app/vendor.css'
+      options.tmp + '/serve/styles/**/*.css',
+      '!' + options.tmp + '/serve/styles/vendor.css'
     ], { read: false });
 
     var injectScripts = gulp.src([
-      options.src + '/app/**/*.js',
-      '!' + options.src + '/app/**/*.spec.js',
-      '!' + options.src + '/app/**/*.mock.js'
+      options.src + '/**/*.js',
+      '!' + options.src + '/**/*.test.js',
+      '!' + options.src + '/**/*.mock.js',
+      '!' + options.src + '/bower/**/*.js'
     ])
     .pipe($.angularFilesort()).on('error', options.errorHandler('AngularFilesort'));
 

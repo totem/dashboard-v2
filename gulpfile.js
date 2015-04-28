@@ -1,22 +1,24 @@
 'use strict';
 
-var gulp = require('gulp');
-var gutil = require('gulp-util');
-var wrench = require('wrench');
+var gulp = require('gulp'),
+    gutil = require('gulp-util'),
+    wrench = require('wrench');
 
 var options = {
-  src: 'src',
+  src: 'app',
   dist: 'dist',
   tmp: '.tmp',
   e2e: 'e2e',
+
   errorHandler: function(title) {
     return function(err) {
       gutil.log(gutil.colors.red('[' + title + ']'), err.toString());
       this.emit('end');
     };
   },
+
   wiredep: {
-    directory: 'bower_components',
+    directory: 'app/bower',
     exclude: [/jquery/, /bootstrap-sass-official\/.*\.js/, /bootstrap\.css/]
   }
 };
