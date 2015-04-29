@@ -85,3 +85,4 @@ Run tests against generated `dist` files (production mode)
 ## Deploy
 
 This app is deployed automatically via Totem.
+(Note: This will be bundled with totem provisioner in future)
