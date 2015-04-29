@@ -3,3 +3,9 @@ node_js:
   - '0.12'
   - '0.10'
   - 'iojs'
+before_install:
+  - npm install -g gulp
+  - npm install -g bower
+install:
+  - npm install
+  - bower install

@@ -2,8 +2,7 @@
   "name": "totemDashboard",
   "version": "0.0.0",
   "scripts": {
-    "test": "./node_modules/.bin/gulp test && ./node_modules/.bin/gulp protractor:dist",
-    "postinstall": "./node_modules/.bin/bower install"
+    "test": "./node_modules/.bin/gulp test && ./node_modules/.bin/gulp protractor:dist"
   },
   "homepage": "https://github.com/totem/dashboard-v2",
   "bugs": {

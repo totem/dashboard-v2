@@ -7,18 +7,19 @@
 
 You need [Node.js](https://nodejs.org/) 0.10.x installed (use [nvm](https://github.com/creationix/nvm)).
 
-Once node is running, you will need [Gulp](http://gulpjs.com/) installed globally to run the project
+Once node is running, you will need [Gulp](http://gulpjs.com/) and [Bower](http://bower.io/) installed globally to run the project
 
 ```sh
-$ npm install -g gulp
+$ npm install -g gulp bower
 ```
 
 Install dependencies:
 
 ```sh
 $ git clone git@github.com:totem/dashboard-v2.git
-$ cd dashvoard-v2
+$ cd dashboard-v2
 $ npm install
+$ bower install
 ```
 
 ## Build
@@ -48,10 +49,11 @@ $ gulp serve:dist
 Run the app in "production" mode locally.
 
 ```sh
-$ docker build .
+$ docker build -t totem-dashboard:local .
+$ docker run -Pit totem-dashboard:local
 ```
 
-Run the app in Docker which mirrors production better than the previous command. This requires that [Boot2Docker](http://boot2docker.io/) is intalled and running.
+Run the app in Docker which mirrors production better than the previous command. This requires that [Boot2Docker](http://boot2docker.io/) is installed and running.
 
 ## Test
 

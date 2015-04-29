@@ -12,11 +12,13 @@ ADD package.json /opt/totem-dashboard/
 # Install node modules
 RUN cd /opt/totem-dashboard; rm -rf node_modules; npm install
 
-# Update talu directory files
+# Update dashboard directory files
 ADD . /opt/totem-dashboard
 
-# Install dependencies
-RUN cd /opt/totem-dashboard; npm install
+# Bower build
+RUN rm -rf /opt/totem-dashboard/dist /opt/totem-dashboard/build && \
+    cd /opt/totem-dashboard && \
+    bower --allow-root install
 
 # Expose port
 EXPOSE 3000
