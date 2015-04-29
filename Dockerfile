@@ -16,8 +16,8 @@ RUN cd /opt/totem-dashboard; rm -rf node_modules; npm install
 ADD . /opt/totem-dashboard
 
 # Bower build
-RUN rm -rf /opt/totem-dashboard/dist /opt/totem-dashboard/build && \
-    cd /opt/totem-dashboard && \
+RUN cd /opt/totem-dashboard && \
+    gulp clean && \
     bower --allow-root install
 
 # Expose port
@@ -28,8 +28,8 @@ ENV DISCOVER totem-dashboard:3000
 
 WORKDIR /opt/totem-dashboard
 
-# Set default command to node-static
+# Set default command to gulp
 ENTRYPOINT ["gulp"]
 
-# Set default param for node-static to the output directory
+# Set default param for gulp to the output directory
 CMD ["serve:dist"]
