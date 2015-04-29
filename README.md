@@ -38,7 +38,7 @@ This will generate the `dist` folder that is served in production.
 $ gulp serve
 ```
 
-Run the app locally in development mode.
+Run the app locally in development mode at `http://localhost:3000`.
 
 ### Production
 
@@ -46,7 +46,7 @@ Run the app locally in development mode.
 $ gulp serve:dist
 ```
 
-Run the app in "production" mode locally.
+Run the app in "production" mode locally at `http://localhost:3000`.
 
 ```sh
 $ docker build -t totem-dashboard:local .
