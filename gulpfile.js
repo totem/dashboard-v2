@@ -18,9 +18,9 @@ var options = {
   },
 
   wiredep: {
-    exclude: [/jquery/, /bootstrap-sass-official\/.*\.js/, /bootstrap\.css/, /.*\.min\.js/],
+    exclude: [/jquery/, /bootstrap-sass-official\/.*\.js/, /bootstrap\.css/],
     onMainNotFound: function (pkg) {
-      console.log('wiredep - bower - main not found for ', pkg)
+      console.log('wiredep - main not found for ' + pkg);
     }
   }
 };

@@ -11,23 +11,23 @@ angular.module('totemDashboard')
   })
 
   .controller('ListCtrl', function ($scope, $filter, ngTableParams) {
-    var data = [{name: "Moroni", value: 50},
-                {name: "Tiancum", value: 43},
-                {name: "Jacob", value: 27},
-                {name: "Nephi", value: 29},
-                {name: "Enos", value: 34},
-                {name: "Tiancum", value: 43},
-                {name: "Jacob", value: 27},
-                {name: "Nephi", value: 29},
-                {name: "Enos", value: 34},
-                {name: "Tiancum", value: 43},
-                {name: "Jacob", value: 27},
-                {name: "Nephi", value: 29},
-                {name: "Enos", value: 34},
-                {name: "Tiancum", value: 43},
-                {name: "Jacob", value: 27},
-                {name: "Nephi", value: 29},
-                {name: "Enos", value: 34}];
+    var data = [{name: 'Moroni', value: 50},
+                {name: 'Tiancum', value: 43},
+                {name: 'Jacob', value: 27},
+                {name: 'Nephi', value: 29},
+                {name: 'Enos', value: 34},
+                {name: 'Tiancum', value: 43},
+                {name: 'Jacob', value: 27},
+                {name: 'Nephi', value: 29},
+                {name: 'Enos', value: 34},
+                {name: 'Tiancum', value: 43},
+                {name: 'Jacob', value: 27},
+                {name: 'Nephi', value: 29},
+                {name: 'Enos', value: 34},
+                {name: 'Tiancum', value: 43},
+                {name: 'Jacob', value: 27},
+                {name: 'Nephi', value: 29},
+                {name: 'Enos', value: 34}];
 
     $scope.tableParams = new ngTableParams({
       page: 1,
@@ -48,6 +48,6 @@ angular.module('totemDashboard')
 
         $defer.resolve(orderedData.slice((params.page() - 1) * params.count(), params.page() * params.count()));
       }
-    })
+    });
   })
 ;
