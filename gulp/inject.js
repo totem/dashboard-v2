@@ -7,7 +7,7 @@ var $ = require('gulp-load-plugins')();
 var wiredep = require('wiredep').stream;
 
 module.exports = function(options) {
-  gulp.task('inject', ['scripts', 'styles'], function () {
+  gulp.task('inject', ['config', 'scripts', 'styles'], function () {
     var injectStyles = gulp.src([
       options.tmp + '/serve/styles/**/*.css',
       '!' + options.tmp + '/serve/styles/vendor.css'
@@ -15,6 +15,7 @@ module.exports = function(options) {
 
     var injectScripts = gulp.src([
       options.src + '/**/*.js',
+      options.tmp + '/serve/config.js',
       '!' + options.src + '/**/*.test.js',
       '!' + options.src + '/**/*.mock.js',
       '!' + options.src + '/bower/**/*.js'
