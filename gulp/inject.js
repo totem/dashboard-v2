@@ -26,11 +26,10 @@ module.exports = function(options) {
       addRootSlash: false
     };
 
-    return gulp.src(options.src + '/*.html')
+    return gulp.src(options.src + '/index.html')
       .pipe($.inject(injectStyles, injectOptions))
       .pipe($.inject(injectScripts, injectOptions))
       .pipe(wiredep(options.wiredep))
       .pipe(gulp.dest(options.tmp + '/serve'));
-
   });
 };
