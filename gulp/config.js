@@ -11,7 +11,7 @@ module.exports = function(options) {
         name: 'totemDashboard',
         deps: false,
         constants: {
-          elasticSearchURL: process.env.TOTEM_DASHBOARD_ES
+          elasticSearchHost: process.env.ELASTIC_SEARCH_HOST
         }
       }))
       .pipe(gulp.dest(options.tmp + '/serve'));
