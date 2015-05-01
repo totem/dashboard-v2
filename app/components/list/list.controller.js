@@ -10,45 +10,28 @@ angular.module('totemDashboard')
       });
   })
 
-  .controller('ListCtrl', function ($scope, $filter, ngTableParams, client, esFactory) {
-    var data = [{name: 'Moroni', value: 50},
-                {name: 'Tiancum', value: 43},
-                {name: 'Jacob', value: 27},
-                {name: 'Nephi', value: 29},
-                {name: 'Enos', value: 34},
-                {name: 'Tiancum', value: 43},
-                {name: 'Jacob', value: 27},
-                {name: 'Nephi', value: 29},
-                {name: 'Enos', value: 34},
-                {name: 'Tiancum', value: 43},
-                {name: 'Jacob', value: 27},
-                {name: 'Nephi', value: 29},
-                {name: 'Enos', value: 34},
-                {name: 'Tiancum', value: 43},
-                {name: 'Jacob', value: 27},
-                {name: 'Nephi', value: 29},
-                {name: 'Enos', value: 34}];
+  .controller('ListCtrl', function ($scope, $filter, client, esFactory) {
+    $scope.data = [];
 
-    $scope.tableParams = new ngTableParams({
-      page: 1,
-      count: 10,
-      sorting: {
-        name: 'asc'
+    function sanitizeData (data) {
+      var cleanData = [];
+
+      for (var i = 0; i < data.length; i++) {
+        if (data[i]._source['meta-info']) {
+          var cleanObj = {
+            date: data[i]._source.date,
+            owner: data[i]._source['meta-info'].git.owner,
+            repo: data[i]._source['meta-info'].git.repo,
+            ref: data[i]._source['meta-info'].git.ref,
+            original: data[i]._source
+          }
+
+          cleanData.push(cleanObj);
+        }
       }
-    }, {
-      total: data.length,
-      getData: function ($defer, params) {
-        // filtering
-        var orderedData = params.filter() ? $filter('filter')(data, params.filter()) : data;
 
-        // sorting
-        orderedData = params.sorting() ? $filter('orderBy')(orderedData, params.orderBy()) : orderedData;
-
-        params.total(orderedData.length);
-
-        $defer.resolve(orderedData.slice((params.page() - 1) * params.count(), params.page() * params.count()));
-      }
-    });
+      return cleanData;
+    }
 
     client.cluster.state({
       metric: [
@@ -75,11 +58,24 @@ angular.module('totemDashboard')
     });
 
     client.search({
-      index: 'totem-production'
+      index: 'totem-production',
+      type: 'events',
+      size: 100,
+      body: {
+        query: {
+          match: {
+            type: 'NEW_JOB'
+          }
+        }
+      }
     })
     .then(function (resp) {
-      $scope.totem = resp;
+      $scope.data = sanitizeData(resp.hits.hits);
     });
+
+    $scope.difference = function (build) {
+      return $filter('amDifference')(build.date, null) * -1;
+    }
 
     window.scope = $scope;
   })
