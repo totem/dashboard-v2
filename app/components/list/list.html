@@ -8,7 +8,7 @@
     </tr>
   </thead>
   <tbody>
-    <tr ng-repeat="build in data | orderBy: difference">
+    <tr ng-repeat="build in data | orderBy : 'difference'">
       <td>{{ build.owner }}</td>
       <td>{{ build.repo }}</td>
       <td>{{ build.ref }}</td>

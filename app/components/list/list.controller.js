@@ -24,6 +24,7 @@ angular.module('totemDashboard')
         if (data[i]._source['meta-info']) {
           var cleanObj = {
             date: data[i]._source.date,
+            difference: $filter('amDifference')(data[i]._source.date, null, 'seconds') * -1,
             owner: data[i]._source['meta-info'].git.owner,
             repo: data[i]._source['meta-info'].git.repo,
             ref: data[i]._source['meta-info'].git.ref,
@@ -36,30 +37,6 @@ angular.module('totemDashboard')
 
       return cleanData;
     }
-
-    client.cluster.state({
-      metric: [
-        'cluster_name',
-        'nodes',
-        'master_node',
-        'version'
-      ]
-    })
-    .then(function (resp) {
-      $scope.clusterState = resp;
-      $scope.error = null;
-    })
-    .catch(function (err) {
-      $scope.clusterState = null;
-      $scope.error = err;
-      // if the err is a NoConnections error, then the client was not able to
-      // connect to elasticsearch. In that case, create a more detailed error
-      // message
-      if (err instanceof esFactory.errors.NoConnections) {
-        $scope.error = new Error('Unable to connect to elasticsearch. ' +
-          'Make sure that it is running and listening at http://localhost:9200');
-      }
-    });
 
     $scope.getData = function () {
       var query = {
@@ -84,6 +61,7 @@ angular.module('totemDashboard')
         size: $scope.pageSize,
         from: $scope.page * $scope.pageSize,
         body: {
+          sort: [{date: {order: 'desc'}}],
           query: query
         }
       })
@@ -91,10 +69,6 @@ angular.module('totemDashboard')
         $scope.data = sanitizeData(resp.hits.hits);
         $scope.updatePages(resp.hits.total);
       });
-    };
-
-    $scope.difference = function (build) {
-      return $filter('amDifference')(build.date, null) * -1;
     };
 
     $scope.setPageSize = function (pageSize) {
