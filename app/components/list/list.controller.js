@@ -10,8 +10,11 @@ angular.module('totemDashboard')
       });
   })
 
-  .controller('ListCtrl', function ($scope, $filter, client, esFactory) {
+  .controller('ListCtrl', function ($scope, $filter, $cookies, client, esFactory) {
     $scope.data = [];
+    $scope.pageSize = $cookies.pageSize || 25;
+    $scope.page = 0;
+    $scope.dropdownStatus = {isopen: false};
 
     function sanitizeData (data) {
       var cleanData = [];
@@ -24,7 +27,7 @@ angular.module('totemDashboard')
             repo: data[i]._source['meta-info'].git.repo,
             ref: data[i]._source['meta-info'].git.ref,
             original: data[i]._source
-          }
+          };
 
           cleanData.push(cleanObj);
         }
@@ -57,25 +60,77 @@ angular.module('totemDashboard')
       }
     });
 
-    client.search({
-      index: 'totem-production',
-      type: 'events',
-      size: 100,
-      body: {
-        query: {
-          match: {
-            type: 'NEW_JOB'
+    $scope.getData = function () {
+      client.search({
+        index: 'totem-production',
+        type: 'events',
+        size: $scope.pageSize,
+        from: $scope.page * $scope.pageSize,
+        body: {
+          query: {
+            match: {
+              type: 'NEW_JOB'
+            }
           }
         }
-      }
-    })
-    .then(function (resp) {
-      $scope.data = sanitizeData(resp.hits.hits);
-    });
+      })
+      .then(function (resp) {
+        $scope.data = sanitizeData(resp.hits.hits);
+        $scope.updatePages(resp.hits.total);
+      });
+    };
 
     $scope.difference = function (build) {
       return $filter('amDifference')(build.date, null) * -1;
-    }
+    };
+
+    $scope.setPageSize = function (pageSize) {
+      $scope.pageSize = $cookies.pageSize = pageSize;
+      $scope.getData();
+    };
+
+    $scope.setPage = function (page) {
+      if (page === 'next' && $scope.page < 9) {
+        $scope.setPage($scope.page + 1);
+        return;
+      }
+
+      if (page === 'prev' && $scope.page > 0) {
+        $scope.setPage($scope.page - 1);
+      }
+
+      $scope.page = page;
+      $scope.getData();
+    };
+
+    $scope.toggleDropdown = function($event) {
+      $event.preventDefault();
+      $event.stopPropagation();
+      $scope.status.isopen = !$scope.status.isopen;
+    };
+
+    $scope.updatePages = function (total) {
+      var totalPages = Math.ceil(total / $scope.pageSize),
+          pagesArr = [];
+
+      if (totalPages > 10) {
+        totalPages = 10;
+      }
+
+      for (var i = 0; i < totalPages; i++) {
+        pagesArr.push(i);
+      }
+
+      $scope.pagesArr = pagesArr;
+
+      var lastPage = pagesArr[pagesArr.length - 1];
+
+      if ($scope.page > lastPage) {
+        $scope.setPage(lastPage);
+      }
+    };
+
+    $scope.getData();
 
     window.scope = $scope;
   })

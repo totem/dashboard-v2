@@ -16,3 +16,16 @@
     </tr>
   </tbody>
 </table>
+
+<div class="btn-group" role="group">
+  <button type="button" class="btn btn-default" ng-click="setPage('prev')">Prev</button>
+  <button type="button" class="btn" ng-repeat="n in pagesArr" ng-click="setPage($index)" ng-class="page === $index ? 'btn-active' : 'btn-default'">{{ $index + 1 }}</button>
+  <button type="button" class="btn btn-default" ng-click="setPage('next')">Next</button>
+</div>
+
+<div class="btn-group" dropdown is-open="dropdownStatus.isopen">
+  <button class="btn btn-default dropdown-toggle" type="button" dropdown-toggle>Page length <span class="caret"></span></button>
+  <ul class="dropdown-menu" role="menu">
+    <li role="presentation" ng-repeat="n in [10,25,50,100]"><a role="menuitem" tabindex="-1" ng-click="setPageSize(n)">{{ n }}</a></li>
+  </ul>
+</div>
