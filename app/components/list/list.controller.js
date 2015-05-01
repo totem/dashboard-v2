@@ -15,6 +15,7 @@ angular.module('totemDashboard')
     $scope.pageSize = $cookies.pageSize || 25;
     $scope.page = 0;
     $scope.dropdownStatus = {isopen: false};
+    $scope.query = {};
 
     function sanitizeData (data) {
       var cleanData = [];
@@ -61,17 +62,29 @@ angular.module('totemDashboard')
     });
 
     $scope.getData = function () {
+      var query = {
+        bool: {
+          should: [
+            {match: {type: 'NEW_JOB'}}
+          ]
+        }
+      };
+
+      for (var param in $scope.query) {
+        if ($scope.query[param]) {
+          var newQuery = {match: {}};
+          newQuery.match[param] = $scope.query[param];
+          query.bool.should.push(newQuery);
+        }
+      }
+
       client.search({
         index: 'totem-production',
         type: 'events',
         size: $scope.pageSize,
         from: $scope.page * $scope.pageSize,
         body: {
-          query: {
-            match: {
-              type: 'NEW_JOB'
-            }
-          }
+          query: query
         }
       })
       .then(function (resp) {
@@ -113,12 +126,12 @@ angular.module('totemDashboard')
       var totalPages = Math.ceil(total / $scope.pageSize),
           pagesArr = [];
 
-      if (totalPages > 10) {
-        totalPages = 10;
-      }
-
       for (var i = 0; i < totalPages; i++) {
         pagesArr.push(i);
+
+        if (i >= 9) {
+          break;
+        }
       }
 
       $scope.pagesArr = pagesArr;

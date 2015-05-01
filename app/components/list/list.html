@@ -29,3 +29,19 @@
     <li role="presentation" ng-repeat="n in [10,25,50,100]"><a role="menuitem" tabindex="-1" ng-click="setPageSize(n)">{{ n }}</a></li>
   </ul>
 </div>
+
+<form>
+  <div class="form-group">
+    <label for="owner">Owner</label>
+    <input type="text" class="form-control" id="owner" ng-model="query.owner" />
+  </div>
+  <div class="form-group">
+    <label for="repo">Repo</label>
+    <input type="text" class="form-control" id="repo" ng-model="query.repo" />
+  </div>
+  <div class="form-group">
+    <label for="ref">Ref</label>
+    <input type="text" class="form-control" id="ref" ng-model="query.ref" />
+  </div>
+  <button type="submit" class="btn btn-default" ng-click="getData()">Search</button>
+</form>
