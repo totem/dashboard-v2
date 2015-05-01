@@ -10,7 +10,7 @@ angular.module('totemDashboard')
       });
   })
 
-  .controller('ListCtrl', function ($scope, $filter, $cookies, client, esFactory) {
+  .controller('ListCtrl', function ($scope, $filter, $cookies, client) {
     $scope.data = [];
     $scope.pageSize = $cookies.pageSize || 25;
     $scope.page = 0;
@@ -40,18 +40,18 @@ angular.module('totemDashboard')
 
     $scope.getData = function () {
       var query = {
-        bool: {
-          should: [
-            {match: {type: 'NEW_JOB'}}
-          ]
-        }
-      };
+            bool: {
+              must: [
+                {match: {type: 'NEW_JOB'}}
+              ]
+            }
+          };
 
       for (var param in $scope.query) {
         if ($scope.query[param]) {
           var newQuery = {match: {}};
-          newQuery.match[param] = $scope.query[param];
-          query.bool.should.push(newQuery);
+          newQuery.match['meta-info.git.' + param] = $scope.query[param];
+          query.bool.must.push(newQuery);
         }
       }
 
@@ -118,7 +118,5 @@ angular.module('totemDashboard')
     };
 
     $scope.getData();
-
-    window.scope = $scope;
   })
 ;
