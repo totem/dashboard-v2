@@ -12,4 +12,5 @@ angular.module('totemDashboard')
 
   .controller('BaseCtrl', function () {
 
-  });
+  })
+;

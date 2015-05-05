@@ -31,17 +31,32 @@ angular.module('totemDashboard')
     };
 
     $scope.setPage = function (page) {
-      if (page === 'next' && $scope.page < 9) {
-        $scope.setPage($scope.page + 1);
+      // Next button
+      if (page === 'next') {
+        // Only increment within lmits
+        if ($scope.page < $scope.lastPage) {
+          $scope.setPage($scope.page + 1);
+        }
+
         return;
       }
 
-      if (page === 'prev' && $scope.page > 0) {
-        $scope.setPage($scope.page - 1);
+      // Previous button
+      if (page === 'prev') {
+        // Only increment down to 0
+        if ($scope.page > 0) {
+          $scope.setPage($scope.page - 1);
+        }
+
+        return;
       }
 
-      $scope.page = page;
-      $scope.getData();
+      if (typeof page === 'number' &&
+          page >= 0 &&
+          page <= $scope.lastPage) {
+        $scope.page = page;
+        $scope.getData();
+      }
     };
 
     this.updatePages = function (total) {
@@ -51,6 +66,8 @@ angular.module('totemDashboard')
       for (var i = 0; i < totalPages; i++) {
         pagesArr.push(i);
 
+        // This artificially limits the user to 10 pages (max 1000 events)
+        // should be improved in the future
         if (i >= 9) {
           break;
         }
@@ -58,13 +75,14 @@ angular.module('totemDashboard')
 
       $scope.pagesArr = pagesArr;
 
-      var lastPage = pagesArr[pagesArr.length - 1];
+      $scope.lastPage = pagesArr[pagesArr.length - 1];
 
-      if ($scope.page > lastPage) {
-        $scope.setPage(lastPage);
+      if ($scope.page > $scope.lastPage) {
+        $scope.setPage($scope.lastPage);
       }
     };
 
+    // Kick it off
     this.load();
   })
 ;
