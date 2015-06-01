@@ -52,7 +52,7 @@ angular.module('totemDashboard')
       return client.search({
         index: 'totem-production',
         type: 'events',
-        size: opts.pageSize,
+        size: opts.size,
         from: opts.from,
         body: {
           sort: [{date: {order: 'desc'}}],
