@@ -43,8 +43,8 @@ angular.module('totemDashboard')
 
       for (var param in opts.query) {
         if (opts.query[param]) {
-          var newQuery = {match: {}};
-          newQuery.match['meta-info.git.' + param] = opts.query[param];
+          var newQuery = {regexp: {}};
+          newQuery.regexp['meta-info.git.' + param] = '.*(' + opts.query[param] + ').*';
           query.bool.must.push(newQuery);
         }
       }
