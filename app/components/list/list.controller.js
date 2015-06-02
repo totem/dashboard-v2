@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('totemDashboard')
-  .controller('ListCtrl', function ($scope, $filter, $cookies, $rootScope, api) {
+  .controller('ListCtrl', function ($scope, $filter, $cookies, env, api) {
     var self = this;
 
     this.load = function () {
@@ -11,9 +11,9 @@ angular.module('totemDashboard')
       $scope.dropdownStatus = {isopen: false};
       $scope.query = {};
 
-      $scope.$watch(
+      $scope.$watchCollection(
         function () {
-          return $rootScope.env;
+          return env.get();
         },
         function () {
           console.log('changed!');

@@ -2,29 +2,33 @@
 
 angular.module('totemDashboard')
   .service('config', function ($http, $q, totemConfigUrl) {
-    var cache;
+    var self = this;
+    this.environments = null;
 
     this.get = function () {
       var deferred = $q.defer();
 
-      if (!cache) {
+      if (!this.environments) {
         this.getRaw()
         .success(function (data) {
-          cache = data;
-          deferred.resolve(data);
+          // self.environments = data.environments;
+          deferred.resolve(data.environments);
         })
         .error(function (data) {
           deferred.reject(data);
         });
       } else {
-        deferred.resolve(cache);
+        deferred.resolve(this.environments);
       }
 
       return deferred.promise;
     };
 
     this.getRaw = function () {
-      return $http.get(totemConfigUrl);
+      return $http.get(totemConfigUrl).success(function (data) {
+        self.environments = data.environments;
+        // deferred.resolve(data.environments);
+      });
     };
   })
 
@@ -33,18 +37,7 @@ angular.module('totemDashboard')
 
     this.get = function () {
       if (!env) this.set('production');
-
-      var deferred = $q.defer();
-
-      config.get()
-      .then(function (data) {
-        deferred.resolve(data.environments[env]);
-      })
-      .catch(function (data) {
-        deferred.reject(data);
-      });
-
-      return deferred.promise;
+      return config.environments[env];
     };
 
     this.set = function (newEnv) {

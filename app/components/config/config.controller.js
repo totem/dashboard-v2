@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('totemDashboard')
-  .controller('ConfigCtrl', function ($scope, $rootScope, config) {
+  .controller('ConfigCtrl', function ($scope, config, env) {
     var self = this;
 
     this.load = function () {
@@ -11,14 +11,15 @@ angular.module('totemDashboard')
 
     this.getConfig = function () {
       config.get().then(function (res) {
-        self.environments = res.environments;
-        $scope.environments = Object.keys(res.environments);
-        $scope.setEnv('development');
+        self.environments = res;
+        $scope.environments = Object.keys(res);
+        $scope.setEnv('production');
       });
     };
 
-    $scope.setEnv = function (env) {
-      $rootScope.env = self.environments[env];
+    $scope.setEnv = function (newEnv) {
+      env.set(newEnv);
+      $scope.currentEnv = newEnv;
     };
 
     this.load();

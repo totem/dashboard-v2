@@ -1,19 +1,23 @@
 'use strict';
 
 angular.module('totemDashboard')
-  .service('client', function (env, esFactory, elasticSearchHost) {
-    env.get().then(function (envObj) {
-      return esFactory({
-        host: envObj.elasticsearch.url,
+  .service('client', function (env, esFactory) {
+    var cache = {};
+
+    this.get = function () {
+      var host = env.get().elasticsearch.url;
+
+      if (cache[host]) return cache[host];
+
+      return (cache[host] = esFactory({
+        host: host,
         apiVersion: '1.5',
         log: 'trace'
-      });
-    });
+      }));
+    };
   })
 
-  .service('api', function (client, $filter, $rootScope, $q) {
-    if (!$rootScope.env) $q.defer().reject('env not set');
-
+  .service('api', function (client, $filter, env) {
     this.sanitizeData = function (data) {
       var cleanData = [];
 
@@ -53,8 +57,8 @@ angular.module('totemDashboard')
         }
       }
 
-      return client.search({
-        index: $rootScope.env.elasticsearch.index,
+      return client.get().search({
+        index: env.get().elasticsearch.index,
         type: 'events',
         size: opts.size,
         from: opts.from,
