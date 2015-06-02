@@ -16,7 +16,6 @@ angular.module('totemDashboard')
           return env.get();
         },
         function () {
-          console.log('changed!');
           $scope.getData();
         }
       );
