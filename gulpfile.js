@@ -18,8 +18,10 @@ var options = {
   },
 
   wiredep: {
-    directory: 'app/bower',
-    exclude: [/jquery/, /bootstrap-sass-official\/.*\.js/, /bootstrap\.css/]
+    exclude: [/jquery/, /bootstrap-sass-official\/.*\.js/, /bootstrap\.css/],
+    onMainNotFound: function (pkg) {
+      console.log('wiredep - main not found for ' + pkg);
+    }
   }
 };
 

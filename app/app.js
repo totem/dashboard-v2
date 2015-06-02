@@ -1,14 +1,7 @@
 'use strict';
 
-angular.module('totemDashboard', ['ngAnimate', 'ngSanitize', 'ui.router', 'ui.bootstrap'])
-  .config(function ($stateProvider, $urlRouterProvider) {
-    $stateProvider
-      .state('home', {
-        url: '/',
-        templateUrl: 'components/base/base.html',
-        controller: 'BaseCtrl'
-      });
-
+angular.module('totemDashboard', ['ngAnimate', 'ngSanitize', 'ngCookies', 'ui.router', 'ui.bootstrap', 'elasticsearch', 'angularMoment'])
+  .config(function ($urlRouterProvider) {
     $urlRouterProvider.otherwise('/');
   })
 ;

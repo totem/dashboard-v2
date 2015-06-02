@@ -28,6 +28,7 @@ module.exports = function(options) {
 
     var srcFiles = [
       options.src + '/**/*.js',
+      options.tmp + '/**/*.js',
       '!' + options.src + '/bower/**/*.js'
     ].concat(specFiles.map(function(file) {
       return '!' + file;
