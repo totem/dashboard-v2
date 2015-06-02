@@ -11,7 +11,6 @@ angular.module('totemDashboard')
       if (!this.environments) {
         this.getRaw()
         .success(function (data) {
-          // self.environments = data.environments;
           deferred.resolve(data.environments);
         })
         .error(function (data) {
@@ -27,7 +26,6 @@ angular.module('totemDashboard')
     this.getRaw = function () {
       return $http.get(totemConfigUrl).success(function (data) {
         self.environments = data.environments;
-        // deferred.resolve(data.environments);
       });
     };
   })
