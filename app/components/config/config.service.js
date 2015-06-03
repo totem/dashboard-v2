@@ -10,12 +10,13 @@ angular.module('totemDashboard')
 
       if (!this.environments) {
         this.getRaw()
-        .success(function (data) {
-          deferred.resolve(data.environments);
-        })
-        .error(function (data) {
-          deferred.reject(data);
-        });
+          .success(function (data) {
+            deferred.resolve(data.environments);
+          })
+          .error(function (data) {
+            deferred.reject(data);
+          })
+        ;
       } else {
         deferred.resolve(this.environments);
       }
@@ -30,7 +31,7 @@ angular.module('totemDashboard')
     };
   })
 
-  .service('env', function (config, $q) {
+  .service('env', function (config) {
     var env;
 
     this.get = function () {

@@ -2,8 +2,6 @@
 
 angular.module('totemDashboard')
   .controller('ConfigCtrl', function ($scope, config, env) {
-    var self = this;
-
     this.load = function () {
       $scope.dropdownStatus = {isopen: false};
       this.getConfig();
@@ -11,7 +9,6 @@ angular.module('totemDashboard')
 
     this.getConfig = function () {
       config.get().then(function (res) {
-        self.environments = res;
         $scope.environments = Object.keys(res);
         $scope.setEnv('production');
       });
