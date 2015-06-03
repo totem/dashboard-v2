@@ -7,7 +7,9 @@ angular.module('totemDashboard')
     this.get = function () {
       var host = env.get().elasticsearch.url;
 
-      if (cache[host]) return cache[host];
+      if (cache[host]) {
+        return cache[host];
+      }
 
       return (cache[host] = esFactory({
         host: host,

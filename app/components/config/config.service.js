@@ -35,7 +35,9 @@ angular.module('totemDashboard')
     var env;
 
     this.get = function () {
-      if (!env) this.set('production');
+      if (!env) {
+        this.set('production');
+      }
       return config.environments[env];
     };
 
