@@ -1,15 +1,25 @@
 'use strict';
 
 angular.module('totemDashboard')
-  .service('client', function (esFactory, elasticSearchHost) {
-    return esFactory({
-      host: elasticSearchHost,
-      apiVersion: '1.5',
-      log: 'trace'
-    });
+  .service('client', function (env, esFactory) {
+    var cache = {};
+
+    this.get = function () {
+      var host = env.get().elasticsearch.url;
+
+      if (cache[host]) {
+        return cache[host];
+      }
+
+      return (cache[host] = esFactory({
+        host: host,
+        apiVersion: '1.5',
+        log: 'trace'
+      }));
+    };
   })
 
-  .service('api', function (client, $filter) {
+  .service('api', function (client, $filter, env) {
     this.sanitizeData = function (data) {
       var cleanData = [];
 
@@ -49,8 +59,8 @@ angular.module('totemDashboard')
         }
       }
 
-      return client.search({
-        index: 'totem-production',
+      return client.get().search({
+        index: env.get().elasticsearch.index,
         type: 'events',
         size: opts.size,
         from: opts.from,

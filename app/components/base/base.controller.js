@@ -6,7 +6,12 @@ angular.module('totemDashboard')
       .state('base', {
         url: '/',
         templateUrl: 'components/base/base.html',
-        controller: 'BaseCtrl'
+        controller: 'BaseCtrl',
+        resolve: {
+          env: function (config) {
+            return config.getRaw();
+          }
+        }
       });
   })
 
