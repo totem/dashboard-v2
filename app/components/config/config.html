@@ -1,8 +1,8 @@
 <div ng-controller="ConfigCtrl">
   <div class="btn-group" dropdown is-open="dropdownStatus.isopen">
-    <button class="btn btn-default dropdown-toggle" type="button" dropdown-toggle>{{ currentEnv | capitalize }} <span class="caret"></span></button>
+    <button class="btn btn-default dropdown-toggle" type="button" dropdown-toggle>{{ currentEnv | uppercase }} <span class="caret"></span></button>
     <ul class="dropdown-menu" role="menu">
-      <li role="presentation" ng-repeat="env in environments"><a role="menuitem" tabindex="-1" ng-click="setEnv(env)">{{ env | capitalize }}</a></li>
+      <li role="presentation" ng-repeat="env in environments"><a role="menuitem" tabindex="-1" ng-click="setEnv(env)">{{ env | uppercase }}</a></li>
     </ul>
   </div>
 </div>
