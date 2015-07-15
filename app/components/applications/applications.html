@@ -1,0 +1,26 @@
+<div layout="row" layout-wrap>
+  <div flex="33" ng-repeat="tile in applications.deployments">
+    <md-card>
+      <md-card-content>
+        <h2 class="md-title">{{tile.owner}} {{tile.repo}}</h2>
+      </md-card-content>
+
+      <div class="md-actions inset" layout="row" layout-align="end center">
+        <md-button ng-if="hasBranch('master', tile)" ui-sref='app.applicationsSelected({owner: tile.owner, repo: tile.repo, ref: "master"})'>master</md-button>
+        <md-button ng-if="hasBranch('develop', tile)" class="md-primary" ui-sref='app.applicationsSelected({owner: tile.owner, repo: tile.repo, ref: "develop"})'>develop</md-button>
+        <md-menu>
+          <md-button ng-click="$mdOpenMenu($event)">
+            <md-icon class="material-icons">more_horiz</md-icon>
+          </md-button>
+          <md-menu-content width="4">
+            <md-menu-item ng-repeat="ref in tile.refs">
+              <md-button ui-sref='app.applicationsSelected({owner: tile.owner, repo: tile.repo, ref: ref.ref})'>
+                {{ref.ref}}
+              </md-button>
+            </md-menu-item>
+          </md-menu-content>
+        </md-menu>
+      </div>
+    </md-card>
+  </div>
+</div>

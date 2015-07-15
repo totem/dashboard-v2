@@ -3,3 +3,4 @@ app/bower/
 .sass-cache/
 .tmp/
 dist/
+.DS_Store
