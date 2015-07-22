@@ -58,7 +58,7 @@ angular.module('totemDashboard')
       // for each profile, and each location build out the results
       for (var profileName in proxy.hosts) {
         var profile = proxy.hosts[profileName];
-        var hostnames = profile.hostname.split(',');
+        var hostnames = _.compact(profile.hostname.split(','));
 
         for (var locationName in profile.locations) {
           var location = profile.locations[locationName];
@@ -123,11 +123,20 @@ angular.module('totemDashboard')
 
         Response Model
         {
-          applications: {
-            'owner-repo': {
-              ...
+          applications: [
+            {
+              id: "{owner}-{repo}",
+              owner: "{owner}",
+              repo: "{repo}",
+              refs: {
+                {ref}: {
+                  ref: "{ref}",
+                  state: "PROMOTED|FAILED|",
+                  deployments: []
+                }
+              }
             }
-          }
+          ]
         }
       **/
       var esClient = client.get();
@@ -174,12 +183,12 @@ angular.module('totemDashboard')
           }, getMoreUntilDone);
         } else {
           // All results are in the hits array.
-          var deployments = _.chain(hits)
-            .map(transformDeploymentHit)
-            .map(transformProxyData)
+          var applications = _.chain(hits)
+            .map(transformDeploymentHit)  // transform some of the variables to camelCase
+            .map(transformProxyData)  // transform the proxy information into meaningful data
             .sortBy('startedAt')
             .reverse()
-            .reduce(function(results, item) {
+            .reduce(function(results, item) {  // build a map of "{owner}-{repo}" from the deployments to group them
               var parent = getApplicationParent(item, results);
               var ref = item.metaInfo.git.ref;
 
@@ -191,12 +200,11 @@ angular.module('totemDashboard')
 
               return results;
             }, {})
-            .tap(pruneRefs)
+            .tap(pruneRefs)  // remove any refs where decommissioned is the newest "deployment"
+            .map()  // flatten the map into an array
             .value();
 
-          deferred.resolve({
-            deployments: deployments
-          });
+          deferred.resolve(applications);
         }
       });
 
@@ -247,6 +255,7 @@ angular.module('totemDashboard')
       }, function getMoreUntilDone(error, response) {
         if (error) {
           deferred.reject(error);
+          return;
         }
 
         _.each(response.hits.hits, function(hit) {
@@ -365,6 +374,21 @@ angular.module('totemDashboard')
 
       return promise;
     };
+  }])
+
+  .service('logs', ['env', '$websocket', function(env, $websocket) {
+    var cache = {};
+
+    this.connect = function() {
+      var domain = env.get().domain;
+
+      // TODO: determine if we should cache the websocket handle or not
+      if (!cache[domain]) {
+        cache[domain] = 'wss://totem-logs.' + domain + '/logs';
+      }
+
+      return $websocket(cache[domain]);
+    }
   }])
 ;
 

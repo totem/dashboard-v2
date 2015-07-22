@@ -221,5 +221,7 @@ gulp.task('serve:prod', ['config'], serve({
     port: 3000
 }));
 
+gulp.task('serve:dist', ['serve:prod']);
+
 // Default task
 gulp.task('default', ['config', 'livereload', 'serve']);

@@ -32,10 +32,12 @@ This will generate the `dist` folder that is served in production.
 
 ## Run
 
+Running requires having the environment variable TOTEM_DASHBOARD_CONFIG set.
+
 ### Development
 
 ```sh
-$ gulp serve
+$ gulp
 ```
 
 Run the app locally in development mode at `http://localhost:3000`.

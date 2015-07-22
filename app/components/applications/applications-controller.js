@@ -19,7 +19,7 @@ angular.module('totemDashboard')
 }])
 
 .controller('ApplicationsContoller', ['$scope', 'api', function($scope, api) {
-  $scope.applications = {};
+  $scope.data = {};
 
   $scope.hasBranch = function(branchName, app) {
     if (branchName in app.refs) {
@@ -31,7 +31,7 @@ angular.module('totemDashboard')
 
   $scope.load = function() {
     api.listApplications().then(function(results) {
-      $scope.applications = results;
+      $scope.data.applications = results;
     });
   };
 

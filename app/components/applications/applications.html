@@ -1,5 +1,12 @@
+<div>
+  <md-input-container class="md-icon-float" >
+    <md-icon class="material-icons">search</md-icon>
+    <input ng-model="search.$" type="text" placeholder="Search">
+  </md-input-container>
+</div>
+
 <div layout="row" layout-wrap>
-  <div flex="33" ng-repeat="tile in applications.deployments">
+  <div flex="33" ng-repeat="tile in data.applications | filter:search:strict">
     <md-card>
       <md-card-content>
         <h2 class="md-title">{{tile.owner}} {{tile.repo}}</h2>
@@ -10,6 +17,7 @@
         <md-button ng-if="hasBranch('develop', tile)" class="md-primary" ui-sref='app.applicationsSelected({owner: tile.owner, repo: tile.repo, ref: "develop"})'>develop</md-button>
         <md-menu>
           <md-button ng-click="$mdOpenMenu($event)">
+            <md-tooltip>branches</md-tooltip>
             <md-icon class="material-icons">more_horiz</md-icon>
           </md-button>
           <md-menu-content width="4">

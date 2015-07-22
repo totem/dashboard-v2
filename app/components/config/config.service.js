@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('totemDashboard')
-  .service('config', function ($http, $q, totemConfigUrl) {
+  .service('config', ['$http', '$q', 'totemConfigUrl', function ($http, $q, totemConfigUrl) {
     var self = this;
     this.environments = null;
 
@@ -29,20 +29,21 @@ angular.module('totemDashboard')
         self.environments = data.environments;
       });
     };
-  })
+  }])
 
-  .service('env', function (config) {
+  .service('env', ['config', function (config) {
     var env;
 
     this.get = function () {
       if (!env) {
         this.set('production');
       }
+
       return config.environments[env];
     };
 
     this.set = function (newEnv) {
       env = newEnv;
     };
-  })
+  }])
 ;

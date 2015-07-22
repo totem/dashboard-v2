@@ -5,7 +5,7 @@
 /*globals angular*/
 
 angular.module('totemDashboard')
-  .config(function ($stateProvider) {
+  .config(['$stateProvider', function ($stateProvider) {
     $stateProvider
       .state('app', {
         abstract: true,
@@ -18,7 +18,7 @@ angular.module('totemDashboard')
           }
         }
       });
-  })
+  }])
 
   .controller('BaseController', function () {
   });

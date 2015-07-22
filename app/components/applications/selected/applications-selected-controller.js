@@ -2,7 +2,7 @@
 'use strict';
 
 /*jshint strict: true */
-/*globals _,angular*/
+/*globals _,angular,moment,console,$,document*/
 
 angular.module('totemDashboard')
 .config(['$stateProvider', function($stateProvider) {
@@ -18,14 +18,25 @@ angular.module('totemDashboard')
     });
 }])
 
-.controller('ApplicationsSelectedContoller', ['$scope', '$stateParams', 'api', function($scope, $stateParams, api) {
+.controller('ApplicationsSelectedContoller', ['$document', '$scope', '$stateParams', '$websocket', '$mdToast', 'api', 'logs', function($document, $scope, $stateParams, $websocket, $mdToast, api, logService) {
   $scope.application = null;
   $scope.events = [];
+  $scope.logs = {
+    date: '',
+    interval: 5,
+    program: '',
+    running: false,
+    status: null,
+    messages: [],
+    scroll: true,
+    viewing: false
+  };
 
   $scope.selected = {
     deployment: null
   };
 
+  // TODO: Temporary function until node details are added to the document
   function getNodes(deployment) {
     var nodes = [];
     try {
@@ -38,6 +49,14 @@ angular.module('totemDashboard')
     } catch(err) {}
 
     return nodes;
+  }
+
+  function logScroll() {
+    if ($scope.logs.scroll) {
+      angular.element('html, body').animate({
+         scrollTop: $(document).height() + angular.element('#log-messages').offset().top
+      }, 'slow');
+    }
   }
 
   $scope.$watch('selected.deployment', function(deployment) {
@@ -68,12 +87,66 @@ angular.module('totemDashboard')
     return false;
   };
 
+  $scope.stopLogs = function() {
+    if ($scope.websocket) {
+      $scope.websocket.close();
+    }
+    $scope.logs.running = false;
+  };
+
+  $scope.startLogs = function() {
+    $scope.websocket = logService.connect();
+
+    $scope.websocket.onOpen(function() {
+      $scope.logs.running = true;
+      $scope.websocket.send(JSON.stringify({
+        'after-date': $scope.logs.date,
+        interval: $scope.logs.interval,
+        'meta-info': {
+          git: {
+            owner: $stateParams.owner,
+            repo: $stateParams.repo,
+            ref: $stateParams.ref
+          },
+          'program-name': $scope.logs.program
+        }
+      }));
+    });
+
+    $scope.websocket.onMessage(function(message) {
+      var data = JSON.parse(message.data);
+
+      if (data.type === 'LOGS') {
+        _.each(data.details.logs, function(line) {
+          line.date = moment(line.timestamp, 'YYYY-MM-DDTHH:mm:ssZ');
+          $scope.logs.messages.push(line);
+        });
+        logScroll();
+
+        return;
+      }
+
+      if (data.type === 'FAILED') {
+        $scope.logs.running = false;
+      }
+
+      $scope.logs.status = data;
+    });
+
+    $scope.websocket.onClose(function() {
+      $scope.logs.running = false;
+    });
+  };
+
   $scope.load = function() {
     api.getApplication($stateParams.owner, $stateParams.repo, $stateParams.ref).then(function(results) {
       $scope.application = results;
       $scope.application.ref = results.refs[$stateParams.ref];
 
       $scope.selected.deployment = results.ref.deployments[0];
+    }, function(error) {
+      $mdToast.show($mdToast.simple().position('top left').content('Error Getting Application!'));
+      console.error(error);
     });
   };
 
