@@ -39,3 +39,12 @@
   right: 0px;
   z-index: 1000;
 }
+
+.log-controls {
+  md-input-container:not(.md-input-invalid) > md-icon.datetime {
+    color: green;
+  }
+  md-input-container.md-input-invalid > md-icon.datetime {
+    color: red;
+  }
+}

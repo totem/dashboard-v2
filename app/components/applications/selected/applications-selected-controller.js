@@ -18,6 +18,27 @@ angular.module('totemDashboard')
     });
 }])
 
+.directive('humandate', function() {
+  return {
+    require: 'ngModel',
+    link: function(scope, elm, attrs, ctrl) {
+      ctrl.$validators.humandate = function(modelValue, viewValue) {
+        if (ctrl.$isEmpty(modelValue)) {
+          // consider empty models to be valid
+          return true;
+        }
+
+        if (Date.parse(viewValue) !== null) {
+          return true;
+        }
+
+        // it is invalid
+        return false;
+      };
+    }
+  };
+})
+
 .controller('ApplicationsSelectedContoller', ['$document', '$scope', '$stateParams', '$websocket', '$mdToast', 'api', 'logs', function($document, $scope, $stateParams, $websocket, $mdToast, api, logService) {
   $scope.application = null;
   $scope.events = [];
@@ -29,7 +50,8 @@ angular.module('totemDashboard')
     status: null,
     messages: [],
     scroll: true,
-    viewing: false
+    viewing: false,
+    filter: {}
   };
 
   $scope.selected = {
@@ -100,7 +122,7 @@ angular.module('totemDashboard')
     $scope.websocket.onOpen(function() {
       $scope.logs.running = true;
       $scope.websocket.send(JSON.stringify({
-        'after-date': $scope.logs.date,
+        'after-date': Date.parse($scope.logs.date),
         interval: $scope.logs.interval,
         'meta-info': {
           git: {

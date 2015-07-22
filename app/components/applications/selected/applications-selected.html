@@ -85,8 +85,18 @@
           </md-button>
           {{logs.status.description}}
         </md-subheader>
+        <div layout layout-sm="column" class="log-controls">
+          <md-input-container md-no-float flex>
+            <md-icon class="material-icons datetime">access_time</md-icon>
+            <input humandate ng-model="logs.date" type="text" placeholder="How long to look back, empty is now, -30 mins is valid">
+          </md-input-container>
+          <md-input-container md-no-float flex>
+            <md-icon class="material-icons">search</md-icon>
+            <input ng-model="logs.filter.$" type="text" placeholder="Filter">
+          </md-input-container>
+        </div>
         <div class="log-messages" id="log-messages">
-          <div ng-repeat="line in logs.messages"><span class="timestamp">{{ line.date.format('MMM Do h:mm:ss a') }}</span> {{ line.message }}</div>
+          <div ng-repeat="line in logs.messages | filter:logs.filter:strict"><span class="timestamp">{{ line.date.format('MMM Do h:mm:ss a') }}</span> {{ line.message }}</div>
         </div>
       </md-content>
     </md-tab>
