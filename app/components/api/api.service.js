@@ -388,7 +388,7 @@ angular.module('totemDashboard')
       }
 
       return $websocket(cache[domain]);
-    }
+    };
   }])
 ;
 
