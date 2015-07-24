@@ -51,6 +51,7 @@ angular.module('totemDashboard')
     messages: [],
     scroll: true,
     viewing: false,
+    showTimestamp: false,
     filter: {}
   };
 

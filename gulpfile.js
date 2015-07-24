@@ -116,16 +116,16 @@ gulp.task('html', function() {
 
   return target
     .pipe(inject(sources, opts.inject.extra))
-    .pipe(connect.reload())
-    .pipe(gulp.dest(paths.dist));
+    .pipe(gulp.dest(paths.dist))
+    .pipe(connect.reload());
 });
 
 gulp.task('scripts', ['html'], function () {
   return gulp.src(['app/**/*.js', '!app/bower/**/*.js'])
     .pipe(jshint())
     .pipe(jshint.reporter(require('jshint-stylish')))
-    .pipe(connect.reload())
-    .pipe(gulp.dest(paths.dist));
+    .pipe(gulp.dest(paths.dist))
+    .pipe(connect.reload());
 });
 
 gulp.task('assemble', ['bower', 'styles', 'html', 'scripts']);
@@ -141,13 +141,14 @@ gulp.task('config', ['assemble'], function () {
       }
     }))
     // Writes config.js to dist/ folder
-    .pipe(gulp.dest(paths.dist));
+    .pipe(gulp.dest(paths.dist))
+    .pipe(connect.reload());
 });
 
 gulp.task('bower', function() {
   gulp.src(paths.bower.src)
-    .pipe(connect.reload())
-    .pipe(gulp.dest(paths.bower.dist));
+    .pipe(gulp.dest(paths.bower.dist))
+    .pipe(connect.reload());
 });
 
 gulp.task('clean', function () {
