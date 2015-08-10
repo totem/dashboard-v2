@@ -1,7 +1,6 @@
 # Totem v2 dashboard
 
 [![Build Status](https://travis-ci.org/totem/dashboard-v2.svg?branch=develop)](https://travis-ci.org/totem/dashboard-v2)
-[![Coverage Status](https://coveralls.io/repos/totem/dashboard-v2/badge.svg)](https://coveralls.io/r/totem/dashboard-v2)
 
 ## Setup
 
