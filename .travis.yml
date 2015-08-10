@@ -1,0 +1,16 @@
+language: node_js
+node_js:
+  - '0.12'
+  - '0.10'
+  - 'iojs'
+env: TOTEM_DASHBOARD_CONFIG=config.dev
+before_install:
+  - npm install -g gulp
+  - npm install -g bower
+install:
+  - npm install
+  - bower install
+script:
+  - gulp test
+  # Currently running protractor on PhantomJS is too buggy
+  # - gulp protractor:dist

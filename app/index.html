@@ -1,0 +1,44 @@
+<!doctype html>
+<html ng-app="totemDashboard">
+  <head>
+    <meta charset="utf-8">
+    <title>Totem Dashboard</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width">
+    <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <!-- build:css styles/vendor.css -->
+    <link rel="stylesheet" href="/bower/material-design-lite/material.min.css">
+    <link rel="stylesheet" href="/assets/styles/vendor.css">
+    <link rel="stylesheet" href="/bower/json-formatter/dist/json-formatter.css" />
+    <!-- endbuild -->
+
+    <!-- build:css styles/app.css -->
+    <link rel="stylesheet" href="/assets/styles/main.css">
+    <!-- endbuild -->
+  </head>
+  <body class="mdl-color--grey-100 mdl-color-text--grey-700 mdl-base">
+    <!--[if lt IE 10]>
+      <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+    <![endif]-->
+
+    <div ui-view class="mdl-color--grey-100 mdl-color-text--grey-700 mdl-base"></div>
+
+    <!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->
+    <script>
+      (function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
+      function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
+      e=o.createElement(i);r=o.getElementsByTagName(i)[0];
+      e.src='//www.google-analytics.com/analytics.js';
+      r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
+      ga('create','UA-XXXXX-X');ga('send','pageview');
+    </script>
+
+    <!-- build:js scripts/site.js -->
+    <!-- inject:js -->
+    <!-- endinject -->
+    <!-- endbuild -->
+  </body>
+</html>
