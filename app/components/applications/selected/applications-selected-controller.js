@@ -59,19 +59,36 @@ angular.module('totemDashboard')
     deployment: null
   };
 
-  // TODO: Temporary function until node details are added to the document
   function getNodes(deployment) {
-    var nodes = [];
-    try {
-      for (var i = 0; i < deployment.deployment.nodes; i++) {
-        nodes.push({
-          id: i,
-          name: 'node' + (i + 1)
-        });
-      }
-    } catch(err) {}
+    var machines = {};
 
-    return nodes;
+    for (var i = 0; i < deployment.runtime.units.length; i++) {
+      var unit = deployment.runtime.units[i];
+
+      if (unit.unit.indexOf('app') === -1) {
+        break;
+      }
+
+      var address = unit.machine.split('/')[1],
+          id = unit.machine.split('/')[0],
+          upstreamKeyArr = unit.unit.split('@'),
+          upstreamKey = upstreamKeyArr[0] + '-' + upstreamKeyArr[1].split('.')[0];
+
+      machines[address] = machines[address] || {
+        id: id,
+        address: address,
+        units: [],
+        upstreams: {}
+      };
+
+      machines[address].units.push(_.cloneDeep(unit));
+
+      for (var upstream in deployment.runtime.upstreams) {
+        machines[address].upstreams[upstream] = deployment.runtime.upstreams[upstream][upstreamKey].split(':')[1];
+      }
+    }
+
+    return _.valuesIn(machines);
   }
 
   function logScroll() {
