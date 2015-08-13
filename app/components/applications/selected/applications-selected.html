@@ -66,7 +66,29 @@
 
         <div layout="row" layout-sm="column">
           <div flex ng-repeat="node in selected.deployment.nodes">
-            I'm {{ node.name }}!
+            <h4>Node {{ $index + 1 }}</h4>
+
+            <p>
+              <strong>Machine ID:</strong> {{ node.id }}<br />
+              <strong>Machine Address:</strong> {{ node.address }}
+            </p>
+
+            <h5>Upstreams</h5>
+
+            <p>
+              <span ng-repeat="(upstream, port) in node.upstreams">
+                <strong>{{ upstream }}:</strong> {{ port }}<br />
+              </span>
+            </p>
+
+            <h5>Units</h5>
+
+            <p ng-repeat="unit in node.units">
+              <strong>Name:</strong> Unit {{ $index + 1 }}<br />
+              <strong>Active:</strong> {{ unit.active }}<br />
+              <strong>Status:</strong> {{ unit.sub }}<br />
+              <strong>Unit:</strong> {{ unit.unit }}
+            </p>
           </div>
         </div>
       </md-content>
