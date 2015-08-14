@@ -3,22 +3,22 @@
 angular.module('totemDashboard')
   .service('config', ['$http', '$q', 'totemConfigUrl', function ($http, $q, totemConfigUrl) {
     var self = this;
-    this.environments = null;
+    this.settings = null;
 
     this.get = function () {
       var deferred = $q.defer();
 
-      if (!this.environments) {
+      if (!this.settings) {
         this.getRaw()
           .success(function (data) {
-            deferred.resolve(data.environments);
+            deferred.resolve(data);
           })
           .error(function (data) {
             deferred.reject(data);
           })
         ;
       } else {
-        deferred.resolve(this.environments);
+        deferred.resolve(this.settings);
       }
 
       return deferred.promise;
@@ -26,7 +26,7 @@ angular.module('totemDashboard')
 
     this.getRaw = function () {
       return $http.get(totemConfigUrl).success(function (data) {
-        self.environments = data.environments;
+        self.settings = data;
       });
     };
   }])
@@ -39,7 +39,7 @@ angular.module('totemDashboard')
         this.set('production');
       }
 
-      return config.environments[env];
+      return config.settings;
     };
 
     this.set = function (newEnv) {
