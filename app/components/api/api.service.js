@@ -5,13 +5,13 @@
 /*globals _,angular,moment*/
 
 angular.module('totemDashboard')
-  .service('client', function (env, esFactory) {
+  .service('client', ['config', 'esFactory', function (config, esFactory) {
     var cache = {};
 
     this.get = function (logLevel) {
       logLevel = logLevel || 'info';
 
-      var host = env.get().elasticsearch.url;
+      var host = config.elasticsearch.url;
 
       if (cache[host]) {
         return cache[host];
@@ -23,9 +23,9 @@ angular.module('totemDashboard')
         log: logLevel
       }));
     };
-  })
+  }])
 
-  .service('api', ['$q', 'client', 'env', function ($q, client, env) {
+  .service('api', ['$q', 'client', 'config', function ($q, client, config) {
     function transformDeploymentHit(source) {
       // set datum to the cloned meta-info
       source.metaInfo = source['meta-info'];
@@ -162,7 +162,7 @@ angular.module('totemDashboard')
       };
 
       esClient.search({
-        index: env.get().elasticsearch.index,
+        index: config.elasticsearch.index,
         type: 'deployments',
         scroll: '30s',
         size: 1000,
@@ -247,7 +247,7 @@ angular.module('totemDashboard')
       };
 
       esClient.search({
-        index: env.get().elasticsearch.index,
+        index: config.elasticsearch.index,
         type: 'deployments',
         scroll: '30s',
         size: 1000,
@@ -337,7 +337,7 @@ angular.module('totemDashboard')
       };
 
       esClient.search({
-        index: env.get().elasticsearch.index,
+        index: config.elasticsearch.index,
         type: 'events',
         scroll: '30s',
         size: 1000,
@@ -376,11 +376,11 @@ angular.module('totemDashboard')
     };
   }])
 
-  .service('logs', ['env', '$websocket', function(env, $websocket) {
+  .service('logs', ['config', '$websocket', function(config, $websocket) {
     var cache = {};
 
     this.connect = function() {
-      var domain = env.get().domain;
+      var domain = config.domain;
 
       // TODO: determine if we should cache the websocket handle or not
       if (!cache[domain]) {
