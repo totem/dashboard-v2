@@ -110,7 +110,9 @@ angular.module('totemDashboard')
     // try and set a default hostname for each proxy item
     _.each(deployment.proxyMeta || {}, function(item) {
       try {
-        item._choosenHostname = item.hostnames[item.hostnames.length - 1];
+        item._chosenHostname = item.hostnames[item.hostnames.length - 1];
+        var locationKeys = Object.keys(item.locations);
+        item._chosenLocation = item.locations[locationKeys[locationKeys.length -1]];
       } catch(err){}
     });
 
@@ -120,7 +122,7 @@ angular.module('totemDashboard')
   });
 
   $scope.isPublicACL = function(location) {
-    if (location['allowed-acls'].indexOf('public') !== -1) {
+    if (location && location['allowed-acls'].indexOf('public') !== -1) {
       return true;
     }
 
