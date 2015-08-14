@@ -13,8 +13,8 @@ angular.module('totemDashboard')
         controller: 'BaseController',
         templateUrl: 'components/base/base.html',
         resolve: {
-          env: function (config) {
-            return config.getRaw();
+          env: function (configService) {
+            return configService.getRaw();
           }
         }
       });
