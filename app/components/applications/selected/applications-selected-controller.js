@@ -111,8 +111,6 @@ angular.module('totemDashboard')
     _.each(deployment.proxyMeta || {}, function(item) {
       try {
         item._chosenHostname = item.hostnames[item.hostnames.length - 1];
-        var locationKeys = Object.keys(item.locations);
-        item._chosenLocation = item.locations[locationKeys[locationKeys.length -1]];
       } catch(err){}
     });
 

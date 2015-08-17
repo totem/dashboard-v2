@@ -30,48 +30,37 @@
           </md-select>
         </div>
 
-        <div layout="row" layout-sm="column" ng-repeat="item in selected.deployment.proxyMeta">
-          <div flex>
-            <md-input-container>
-              <label>Hostname</label>
-              <md-select ng-model="item._chosenHostname" placeholder="Select a hostname">
-                <md-option ng-value="hostname" ng-repeat="hostname in item.hostnames">{{ hostname }}</md-option>
-              </md-select>
-            </md-input-container>
+        <div ng-repeat="item in selected.deployment.proxyMeta">
+          <div layout="row" layout-sm="column">
+            <div flex>
+              <md-input-container>
+                <label>Hostname</label>
+                <md-select ng-model="item._chosenHostname" placeholder="Select a hostname">
+                  <md-option ng-value="hostname" ng-repeat="hostname in item.hostnames">{{ hostname }}</md-option>
+                </md-select>
+              </md-input-container>
+            </div>
           </div>
-          <div flex>
-            <md-input-container>
-              <label>Location</label>
-              <md-select ng-model="item._chosenLocation" placeholder="Select a location">
-                <md-option ng-value="location" ng-repeat="location in item.locations">{{ location.name }}</md-option>
-              </md-select>
-          </div>
-          <div flex>
-            <md-input-container>
-              <label>Path</label>
-              <input name="port" ng-model="item._chosenLocation.path" disabled="">
-            </md-input-container>
-          </div>
-          <div flex>
-            <md-input-container>
-              <label>Port</label>
-              <input name="port" ng-model="item._chosenLocation.port" disabled="">
-            </md-input-container>
-          </div>
-          <div flex>
-            <md-button class="mdl-button mdl-js-button">
-              <md-tooltip>
-                {{item._chosenLocation['allowed-acls'].join(', ')}}
-              </md-tooltip>
-              <md-icon ng-if="isPublicACL(item._chosenLocation)" class="material-icons">lock_open</md-icon>
-              <md-icon ng-if="!isPublicACL(item._chosenLocation)" class="material-icons">lock</md-icon>
-            </md-button>
-            <md-button ng-href="http://{{item._chosenHostname}}{{item._chosenLocation.path}}" target="_blank" class="mdl-button mdl-js-button mdl-button--icon">
-              <md-tooltip>
-                {{item._chosenHostname}}{{item._chosenLocation.path}}
-              </md-tooltip>
-              <md-icon class="material-icons">explore</md-icon>
-            </md-button>
+          <div flex layout="row" ng-repeat="location in item.locations">
+            <div><p>
+              <strong>Port:</strong> {{ location.port }}<br />
+              <strong>Path:</strong> {{ location.path }}
+            </p></div>
+            <div>
+              <md-button class="mdl-button mdl-js-button">
+                <md-tooltip>
+                  {{ location['allowed-acls'].join(', ') }}
+                </md-tooltip>
+                <md-icon ng-if="isPublicACL(location)" class="material-icons">lock_open</md-icon>
+                <md-icon ng-if="!isPublicACL(location)" class="material-icons">lock</md-icon>
+              </md-button>
+              <md-button ng-href="http://{{ item._chosenHostname }}{{ location.path }}" target="_blank" class="mdl-button mdl-js-button mdl-button--icon">
+                <md-tooltip>
+                  {{ item._chosenHostname }}{{ location.path }}
+                </md-tooltip>
+                <md-icon class="material-icons">explore</md-icon>
+              </md-button>
+            </div>
           </div>
         </div>
 
