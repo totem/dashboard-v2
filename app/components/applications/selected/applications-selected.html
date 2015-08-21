@@ -33,12 +33,10 @@
         <div ng-repeat="item in selected.deployment.proxyMeta">
           <div layout="row" layout-sm="column">
             <div flex>
-              <md-input-container>
-                <label>Hostname</label>
-                <md-select ng-model="item._chosenHostname" placeholder="Select a hostname">
-                  <md-option ng-value="hostname" ng-repeat="hostname in item.hostnames">{{ hostname }}</md-option>
-                </md-select>
-              </md-input-container>
+                <h4>Host {{ $index + 1 }}</h4>
+                <md-radio-group ng-model="item._chosenHostname" class="md-primary">
+                  <md-radio-button ng-repeat="hostname in item.hostnames" ng-value="hostname">{{ hostname }}</md-radio-button>
+                </md-radio-group>
             </div>
           </div>
           <div flex layout="row" ng-repeat="location in item.locations">
@@ -84,10 +82,9 @@
             <h5>Units</h5>
 
             <p ng-repeat="unit in node.units">
-              <strong>Name:</strong> Unit {{ $index + 1 }}<br />
+              <strong>Unit:</strong> {{ unit.unit }}<br />
               <strong>Active:</strong> {{ unit.active }}<br />
-              <strong>Status:</strong> {{ unit.sub }}<br />
-              <strong>Unit:</strong> {{ unit.unit }}
+              <strong>Status:</strong> {{ unit.sub }}
             </p>
           </div>
         </div>
