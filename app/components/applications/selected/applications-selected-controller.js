@@ -39,7 +39,7 @@ angular.module('totemDashboard')
   };
 })
 
-.controller('ApplicationsSelectedContoller', ['$document', '$scope', '$stateParams', '$websocket', '$mdToast', 'api', 'logs', function($document, $scope, $stateParams, $websocket, $mdToast, api, logService) {
+.controller('ApplicationsSelectedContoller', ['$document', '$scope', '$stateParams', '$websocket', '$mdToast', '$window', 'api', 'logs', function($document, $scope, $stateParams, $websocket, $mdToast, $window, api, logService) {
   $scope.application = null;
   $scope.events = [];
   $scope.logs = {
@@ -176,6 +176,10 @@ angular.module('totemDashboard')
     $scope.websocket.onClose(function() {
       $scope.logs.running = false;
     });
+  };
+
+  $scope.open = function (location) {
+    $window.open('http://' + location.hostname + location.path);
   };
 
   $scope.load = function() {

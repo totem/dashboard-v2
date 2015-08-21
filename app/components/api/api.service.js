@@ -42,7 +42,7 @@ angular.module('totemDashboard')
         return {
           hostnames: hostnames,
           profileName: profileName,
-          locations: {}
+          locations: []
         };
       }
 
@@ -61,11 +61,17 @@ angular.module('totemDashboard')
 
         for (var locationName in profile.locations) {
           var location = profile.locations[locationName];
+          location.name = locationName;
 
           // test and set
           result[profileName] = result[profileName] || resultItem(hostnames, profileName);
-          result[profileName].locations[locationName] = location;
-          location.name = locationName;
+
+          for (var i = 0; i < hostnames.length; i++) {
+            var locationWithHost = _.cloneDeep(location);
+            locationWithHost.hostname = hostnames[i];
+            result[profileName].locations.push(locationWithHost);
+          }
+
         }
       }
 
