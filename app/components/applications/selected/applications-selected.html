@@ -60,6 +60,16 @@
         </div>
 
         <div layout="row" layout-sm="column">
+          <div flex>
+            <h3>Events</h3>
+
+            <ul>
+              <li ng-repeat="event in events.events">{{ event.type | lowercase }} <small class="md-caption">- {{ event.startedAt.fromNow() }}</small></li>
+            </ul>
+          </div>
+        </div>
+
+        <div layout="row" layout-sm="column">
           <div flex ng-repeat="node in selected.deployment.nodes">
             <h4>Node {{ $index + 1 }}</h4>
 
