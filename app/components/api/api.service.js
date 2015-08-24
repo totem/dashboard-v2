@@ -38,12 +38,11 @@ angular.module('totemDashboard')
 
     function transformProxyData(item) {
       // method to build a result item
-      function resultItem(port, hostnames, profileName) {
+      function resultItem(hostnames, profileName) {
         return {
-          port: port,
           hostnames: hostnames,
           profileName: profileName,
-          locations: {}
+          locations: []
         };
       }
 
@@ -62,19 +61,17 @@ angular.module('totemDashboard')
 
         for (var locationName in profile.locations) {
           var location = profile.locations[locationName];
+          location.name = locationName;
 
           // test and set
-          result[location.port] = result[location.port] || resultItem(location.port, hostnames, profileName);
-          result[location.port].locations[locationName] = location;
-          location.name = locationName;
-        }
-      }
+          result[profileName] = result[profileName] || resultItem(hostnames, profileName);
 
-      // Check each upstream for ones that aren't proxied
-      for (var key in proxy.upstreams) {
-        // Check if the upstream is configured
-        if (!(key in result)) {
-          result[key] = resultItem(key, [], null);
+          for (var i = 0; i < hostnames.length; i++) {
+            var locationWithHost = _.cloneDeep(location);
+            locationWithHost.hostname = hostnames[i];
+            result[profileName].locations.push(locationWithHost);
+          }
+
         }
       }
 

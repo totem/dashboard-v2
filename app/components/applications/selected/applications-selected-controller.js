@@ -39,7 +39,7 @@ angular.module('totemDashboard')
   };
 })
 
-.controller('ApplicationsSelectedContoller', ['$document', '$scope', '$stateParams', '$websocket', '$mdToast', '$location', 'api', 'logs', function($document, $scope, $stateParams, $websocket, $mdToast, $location, api, logService) {
+.controller('ApplicationsSelectedContoller', ['$document', '$scope', '$stateParams', '$websocket', '$mdToast', '$window', '$location', 'api', 'logs', function($document, $scope, $stateParams, $websocket, $mdToast, $window, $location, api, logService) {
   $scope.application = null;
   $scope.events = [];
   $scope.logs = {
@@ -107,20 +107,13 @@ angular.module('totemDashboard')
     // TODO: Remove once node information is in the document.
     deployment.nodes = getNodes(deployment);
 
-    // try and set a default hostname for each proxy item
-    _.each(deployment.proxyMeta || {}, function(item) {
-      try {
-        item._choosenHostname = item.hostnames[item.hostnames.length - 1];
-      } catch(err){}
-    });
-
     api.getJobEvents(deployment.metaInfo.jobId).then(function(results) {
       $scope.events = results;
     });
   });
 
   $scope.isPublicACL = function(location) {
-    if (location['allowed-acls'].indexOf('public') !== -1) {
+    if (location && location['allowed-acls'].indexOf('public') !== -1) {
       return true;
     }
 
@@ -182,6 +175,10 @@ angular.module('totemDashboard')
     api.deleteDeployment(deployment.deployment.name, deployment.metaInfo.deployer.url).then(function () {
       $scope.selected.deployment.decomissionStarted = true;
     });
+  };
+
+  $scope.open = function (location) {
+    $window.open('http://' + location.hostname + location.path);
   };
 
   $scope.load = function() {

@@ -36,38 +36,33 @@
           </md-select>
         </div>
 
-        <div layout="row" layout-sm="column" ng-repeat="item in selected.deployment.proxyMeta">
-          <div flex="15">
-            <md-input-container>
-              <label>Port</label>
-              <input name="port" ng-model="item.port" disabled="">
-            </md-input-container>
-          </div>
-          <div flex>
-            <md-input-container>
-              <label>Hostname</label>
-              <md-select ng-model="item._choosenHostname" placeholder="Select a hostname">
-                <md-option ng-value="hostname" ng-repeat="hostname in item.hostnames">{{ hostname }}</md-option>
-              </md-select>
-            </md-input-container>
-          </div>
-          <div flex ng-repeat="location in item.locations">
-            <div class="md-actions" layout="row">
-              <md-button>
-                <md-tooltip>
-                  {{location['allowed-acls'].join(', ')}}
-                </md-tooltip>
-                <md-icon ng-if="isPublicACL(location)" class="material-icons">lock_open</md-icon>
-                <md-icon ng-if="!isPublicACL(location)" class="material-icons">lock</md-icon>
-              </md-button>
-              <md-button href="http://{{item._choosenHostname}}{{location.path}}" class="no-transform" target="_blank">
-                <md-tooltip>
-                  {{item._choosenHostname}}{{location.path}}
-                </md-tooltip>
-                {{ location.path }}
-              </md-button>
-            </div>
-          </div>
+        <div layout="row" layout-sm="column">
+          <table class="mdl-data-table mdl-js-data-table">
+            <thead>
+              <tr>
+                <th class="mdl-data-table__cell--non-numeric">Host</th>
+                <th class="mdl-data-table__cell--non-numeric">Path</th>
+                <th>Port</th>
+                <th class="mdl-data-table__cell--non-numeric">Privacy</th>
+              </tr>
+            </thead>
+            <tbody ng-repeat="item in selected.deployment.proxyMeta">
+              <tr ng-repeat="location in item.locations" ng-click="open(location)">
+                <td class="mdl-data-table__cell--non-numeric">{{ location.hostname }}</td>
+                <td class="mdl-data-table__cell--non-numeric">{{ location.path }}</td>
+                <td>{{ location.port }}</td>
+                <td class="mdl-data-table__cell--non-numeric">
+                  <md-button class="mdl-button mdl-js-button">
+                    <md-tooltip>
+                      {{ location['allowed-acls'].join(', ') }}
+                    </md-tooltip>
+                    <md-icon ng-if="isPublicACL(location)" class="material-icons">lock_open</md-icon>
+                    <md-icon ng-if="!isPublicACL(location)" class="material-icons">lock</md-icon>
+                  </md-button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
 
         <div layout="row" layout-sm="column">
@@ -90,10 +85,9 @@
             <h5>Units</h5>
 
             <p ng-repeat="unit in node.units">
-              <strong>Name:</strong> Unit {{ $index + 1 }}<br />
+              <strong>Unit:</strong> {{ unit.unit }}<br />
               <strong>Active:</strong> {{ unit.active }}<br />
-              <strong>Status:</strong> {{ unit.sub }}<br />
-              <strong>Unit:</strong> {{ unit.unit }}
+              <strong>Status:</strong> {{ unit.sub }}
             </p>
           </div>
         </div>
