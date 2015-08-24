@@ -179,7 +179,7 @@ angular.module('totemDashboard')
   };
 
   $scope.deleteDeployment = function (deployment) {
-    api.deleteApplication(deployment.deployment.name, deployment.metaInfo.deployer.url).then(function () {
+    api.deleteDeployment(deployment.deployment.name, deployment.metaInfo.deployer.url).then(function () {
       $scope.selected.deployment.decomissionStarted = true;
     });
   };

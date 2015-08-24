@@ -305,7 +305,7 @@ angular.module('totemDashboard')
       return promise;
     };
 
-    this.deleteApplication = function (appName, deployerUrl) {
+    this.deleteDeployment = function (appName, deployerUrl) {
       return $http.delete(deployerUrl + '/apps/' + appName);
     };
 
