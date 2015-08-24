@@ -5,9 +5,14 @@
     <md-button class="md-raised md-primary" ng-click="">
       Clone
     </md-button>
-    <md-button class="md-raised md-warn">
+    <md-button class="md-raised md-warn" ng-click="deleteDeployment(selected.deployment)">
       <md-icon class="material-icons">delete</md-icon>
     </md-button>
+  </div>
+</md-toolbar>
+<md-toolbar class="md-warn md-hue-2" ng-if="selected.deployment.decomissionStarted">
+  <div class="md-toolbar-tools">
+    <h3>Decommission has started for this deployment</h3>
   </div>
 </md-toolbar>
 

@@ -39,7 +39,7 @@ angular.module('totemDashboard')
   };
 })
 
-.controller('ApplicationsSelectedContoller', ['$document', '$scope', '$stateParams', '$websocket', '$mdToast', 'api', 'logs', function($document, $scope, $stateParams, $websocket, $mdToast, api, logService) {
+.controller('ApplicationsSelectedContoller', ['$document', '$scope', '$stateParams', '$websocket', '$mdToast', '$location', 'api', 'logs', function($document, $scope, $stateParams, $websocket, $mdToast, $location, api, logService) {
   $scope.application = null;
   $scope.events = [];
   $scope.logs = {
@@ -175,6 +175,12 @@ angular.module('totemDashboard')
 
     $scope.websocket.onClose(function() {
       $scope.logs.running = false;
+    });
+  };
+
+  $scope.deleteDeployment = function (deployment) {
+    api.deleteApplication(deployment.deployment.name, deployment.metaInfo.deployer.url).then(function () {
+      $scope.selected.deployment.decomissionStarted = true;
     });
   };
 

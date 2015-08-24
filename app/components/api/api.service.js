@@ -25,7 +25,7 @@ angular.module('totemDashboard')
     };
   }])
 
-  .service('api', ['$q', 'client', 'config', function ($q, client, config) {
+  .service('api', ['$q', '$http', 'client', 'config', function ($q, $http, client, config) {
     function transformDeploymentHit(source) {
       // set datum to the cloned meta-info
       source.metaInfo = source['meta-info'];
@@ -303,6 +303,10 @@ angular.module('totemDashboard')
       });
 
       return promise;
+    };
+
+    this.deleteApplication = function (appName, deployerUrl) {
+      return $http.delete(deployerUrl + '/apps/' + appName);
     };
 
     this.getJobEvents = function(jobId) {
