@@ -107,13 +107,6 @@ angular.module('totemDashboard')
     // TODO: Remove once node information is in the document.
     deployment.nodes = getNodes(deployment);
 
-    // try and set a default hostname for each proxy item
-    _.each(deployment.proxyMeta || {}, function(item) {
-      try {
-        item._chosenHostname = item.hostnames[item.hostnames.length - 1];
-      } catch(err){}
-    });
-
     api.getJobEvents(deployment.metaInfo.jobId).then(function(results) {
       $scope.events = results;
     });
