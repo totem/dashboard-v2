@@ -11,9 +11,23 @@
     </md-button>
   </div>
 </md-toolbar>
+
+<md-toolbar class="md-accent" ng-if="working">
+  <div class="md-toolbar-tools">
+    <h3>Working </h3>
+    <md-progress-circular md-mode="indeterminate" md-diameter="30"></md-progress-circular>
+  </div>
+</md-toolbar>
+
+<md-toolbar class="md-warn ng-cloak" ng-if="loaded && !selected.deployment">
+  <div class="md-toolbar-tools">
+    <h3>Deployment not found</h3>
+  </div>
+</md-toolbar>
+
 <md-toolbar class="md-warn md-hue-2" ng-if="selected.deployment.decomissionStarted">
   <div class="md-toolbar-tools">
-    <h3>Decommission has started for this deployment</h3>
+    <h3>Decommissioning has started for this deployment</h3>
   </div>
 </md-toolbar>
 

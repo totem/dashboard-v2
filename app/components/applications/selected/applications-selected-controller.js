@@ -172,7 +172,9 @@ angular.module('totemDashboard')
   };
 
   $scope.deleteDeployment = function (deployment) {
+    $scope.working = true;
     api.deleteDeployment(deployment.deployment.name, deployment.metaInfo.deployer.url).then(function () {
+      $scope.working = false;
       $scope.selected.deployment.decomissionStarted = true;
     });
   };
@@ -186,7 +188,11 @@ angular.module('totemDashboard')
       $scope.application = results;
       $scope.application.ref = results.refs[$stateParams.ref];
 
-      $scope.selected.deployment = results.ref.deployments[0];
+      try {
+        $scope.selected.deployment = results.ref.deployments[0];
+      } catch (err) {}
+
+      $scope.loaded = true;
     }, function(error) {
       $mdToast.show($mdToast.simple().position('top left').content('Error Getting Application!'));
       console.error(error);
