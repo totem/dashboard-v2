@@ -39,7 +39,7 @@ angular.module('totemDashboard')
   };
 })
 
-.controller('ApplicationsSelectedContoller', ['$document', '$scope', '$stateParams', '$websocket', '$mdToast', '$window', 'api', 'logs', function($document, $scope, $stateParams, $websocket, $mdToast, $window, api, logService) {
+.controller('ApplicationsSelectedContoller', ['$document', '$scope', '$stateParams', '$websocket', '$mdToast', '$window', '$location', 'api', 'logs', function($document, $scope, $stateParams, $websocket, $mdToast, $window, $location, api, logService) {
   $scope.application = null;
   $scope.events = [];
   $scope.logs = {
@@ -171,6 +171,14 @@ angular.module('totemDashboard')
     });
   };
 
+  $scope.deleteDeployment = function (deployment) {
+    $scope.working = true;
+    api.deleteDeployment(deployment.deployment.name, deployment.metaInfo.deployer.url).then(function () {
+      $scope.working = false;
+      $scope.selected.deployment.decomissionStarted = true;
+    });
+  };
+
   $scope.open = function (location) {
     $window.open('http://' + location.hostname + location.path);
   };
@@ -180,7 +188,11 @@ angular.module('totemDashboard')
       $scope.application = results;
       $scope.application.ref = results.refs[$stateParams.ref];
 
-      $scope.selected.deployment = results.ref.deployments[0];
+      try {
+        $scope.selected.deployment = results.ref.deployments[0];
+      } catch (err) {}
+
+      $scope.loaded = true;
     }, function(error) {
       $mdToast.show($mdToast.simple().position('top left').content('Error Getting Application!'));
       console.error(error);
