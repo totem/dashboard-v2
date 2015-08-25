@@ -4,30 +4,27 @@ describe('Controller: config', function() {
 
   beforeEach(module('totemDashboard'));
 
-  var config,
+  var configService,
       httpBackend;
 
-  var environments = {
-    production: {
-      elasticsearch: {
-        index: 'totem-production',
-        url: 'elasticsearch.dev'
-      }
+  var settings = {
+    domain: 'totem-dashboard.dev',
+    elasticsearch: {
+      index: 'totem-production',
+      url: 'elasticsearch.dev'
     }
   };
 
-  beforeEach(inject(function(_config_, $httpBackend) {
-    config = _config_;
+  beforeEach(inject(function(_configService_, $httpBackend) {
+    configService = _configService_;
     httpBackend = $httpBackend;
   }));
 
   it('should get config data from the config url', inject(function(totemConfigUrl) {
-    httpBackend.whenGET(totemConfigUrl).respond({
-      environments: environments
-    });
+    httpBackend.whenGET(totemConfigUrl).respond(settings);
 
-    config.get().then(function (data) {
-      expect(data).toEqual(environments);
+    configService.get().then(function (data) {
+      expect(data).toEqual(settings);
     });
 
     httpBackend.flush();

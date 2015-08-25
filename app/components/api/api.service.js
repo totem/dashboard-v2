@@ -5,13 +5,13 @@
 /*globals _,angular,moment*/
 
 angular.module('totemDashboard')
-  .service('client', function (env, esFactory) {
+  .service('client', ['config', 'esFactory', function (config, esFactory) {
     var cache = {};
 
     this.get = function (logLevel) {
       logLevel = logLevel || 'info';
 
-      var host = env.get().elasticsearch.url;
+      var host = config.elasticsearch.url;
 
       if (cache[host]) {
         return cache[host];
@@ -23,9 +23,9 @@ angular.module('totemDashboard')
         log: logLevel
       }));
     };
-  })
+  }])
 
-  .service('api', ['$q', 'client', 'env', function ($q, client, env) {
+  .service('api', ['$q', '$http', 'client', 'config', function ($q, $http, client, config) {
     function transformDeploymentHit(source) {
       // set datum to the cloned meta-info
       source.metaInfo = source['meta-info'];
@@ -38,12 +38,11 @@ angular.module('totemDashboard')
 
     function transformProxyData(item) {
       // method to build a result item
-      function resultItem(port, hostnames, profileName) {
+      function resultItem(hostnames, profileName) {
         return {
-          port: port,
           hostnames: hostnames,
           profileName: profileName,
-          locations: {}
+          locations: []
         };
       }
 
@@ -62,19 +61,17 @@ angular.module('totemDashboard')
 
         for (var locationName in profile.locations) {
           var location = profile.locations[locationName];
+          location.name = locationName;
 
           // test and set
-          result[location.port] = result[location.port] || resultItem(location.port, hostnames, profileName);
-          result[location.port].locations[locationName] = location;
-          location.name = locationName;
-        }
-      }
+          result[profileName] = result[profileName] || resultItem(hostnames, profileName);
 
-      // Check each upstream for ones that aren't proxied
-      for (var key in proxy.upstreams) {
-        // Check if the upstream is configured
-        if (!(key in result)) {
-          result[key] = resultItem(key, [], null);
+          for (var i = 0; i < hostnames.length; i++) {
+            var locationWithHost = _.cloneDeep(location);
+            locationWithHost.hostname = hostnames[i];
+            result[profileName].locations.push(locationWithHost);
+          }
+
         }
       }
 
@@ -162,7 +159,7 @@ angular.module('totemDashboard')
       };
 
       esClient.search({
-        index: env.get().elasticsearch.index,
+        index: config.elasticsearch.index,
         type: 'deployments',
         scroll: '30s',
         size: 1000,
@@ -247,7 +244,7 @@ angular.module('totemDashboard')
       };
 
       esClient.search({
-        index: env.get().elasticsearch.index,
+        index: config.elasticsearch.index,
         type: 'deployments',
         scroll: '30s',
         size: 1000,
@@ -305,6 +302,10 @@ angular.module('totemDashboard')
       return promise;
     };
 
+    this.deleteDeployment = function (appName, deployerUrl) {
+      return $http.delete(deployerUrl + '/apps/' + appName);
+    };
+
     this.getJobEvents = function(jobId) {
       /**
         Get all events for a jobId.
@@ -337,7 +338,7 @@ angular.module('totemDashboard')
       };
 
       esClient.search({
-        index: env.get().elasticsearch.index,
+        index: config.elasticsearch.index,
         type: 'events',
         scroll: '30s',
         size: 1000,
@@ -376,11 +377,11 @@ angular.module('totemDashboard')
     };
   }])
 
-  .service('logs', ['env', '$websocket', function(env, $websocket) {
+  .service('logs', ['config', '$websocket', function(config, $websocket) {
     var cache = {};
 
     this.connect = function() {
-      var domain = env.get().domain;
+      var domain = config.domain;
 
       // TODO: determine if we should cache the websocket handle or not
       if (!cache[domain]) {

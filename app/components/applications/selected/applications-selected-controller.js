@@ -39,7 +39,7 @@ angular.module('totemDashboard')
   };
 })
 
-.controller('ApplicationsSelectedContoller', ['$document', '$scope', '$stateParams', '$websocket', '$mdToast', 'api', 'logs', function($document, $scope, $stateParams, $websocket, $mdToast, api, logService) {
+.controller('ApplicationsSelectedContoller', ['$document', '$scope', '$stateParams', '$websocket', '$mdToast', '$window', '$location', 'api', 'logs', function($document, $scope, $stateParams, $websocket, $mdToast, $window, $location, api, logService) {
   $scope.application = null;
   $scope.events = [];
   $scope.logs = {
@@ -59,19 +59,36 @@ angular.module('totemDashboard')
     deployment: null
   };
 
-  // TODO: Temporary function until node details are added to the document
   function getNodes(deployment) {
-    var nodes = [];
-    try {
-      for (var i = 0; i < deployment.deployment.nodes; i++) {
-        nodes.push({
-          id: i,
-          name: 'node' + (i + 1)
-        });
-      }
-    } catch(err) {}
+    var machines = {};
 
-    return nodes;
+    for (var i = 0; i < deployment.runtime.units.length; i++) {
+      var unit = deployment.runtime.units[i];
+
+      if (unit.unit.indexOf('app') === -1) {
+        break;
+      }
+
+      var address = unit.machine.split('/')[1],
+          id = unit.machine.split('/')[0],
+          upstreamKeyArr = unit.unit.split('@'),
+          upstreamKey = upstreamKeyArr[0] + '-' + upstreamKeyArr[1].split('.')[0];
+
+      machines[address] = machines[address] || {
+        id: id,
+        address: address,
+        units: [],
+        upstreams: {}
+      };
+
+      machines[address].units.push(_.cloneDeep(unit));
+
+      for (var upstream in deployment.runtime.upstreams) {
+        machines[address].upstreams[upstream] = deployment.runtime.upstreams[upstream][upstreamKey].split(':')[1];
+      }
+    }
+
+    return _.valuesIn(machines);
   }
 
   function logScroll() {
@@ -90,20 +107,13 @@ angular.module('totemDashboard')
     // TODO: Remove once node information is in the document.
     deployment.nodes = getNodes(deployment);
 
-    // try and set a default hostname for each proxy item
-    _.each(deployment.proxyMeta || {}, function(item) {
-      try {
-        item._choosenHostname = item.hostnames[item.hostnames.length - 1];
-      } catch(err){}
-    });
-
     api.getJobEvents(deployment.metaInfo.jobId).then(function(results) {
       $scope.events = results;
     });
   });
 
   $scope.isPublicACL = function(location) {
-    if (location['allowed-acls'].indexOf('public') !== -1) {
+    if (location && location['allowed-acls'].indexOf('public') !== -1) {
       return true;
     }
 
@@ -161,12 +171,28 @@ angular.module('totemDashboard')
     });
   };
 
+  $scope.deleteDeployment = function (deployment) {
+    $scope.working = true;
+    api.deleteDeployment(deployment.deployment.name, deployment.metaInfo.deployer.url).then(function () {
+      $scope.working = false;
+      $scope.selected.deployment.decomissionStarted = true;
+    });
+  };
+
+  $scope.open = function (location) {
+    $window.open('http://' + location.hostname + location.path);
+  };
+
   $scope.load = function() {
     api.getApplication($stateParams.owner, $stateParams.repo, $stateParams.ref).then(function(results) {
       $scope.application = results;
       $scope.application.ref = results.refs[$stateParams.ref];
 
-      $scope.selected.deployment = results.ref.deployments[0];
+      try {
+        $scope.selected.deployment = results.ref.deployments[0];
+      } catch (err) {}
+
+      $scope.loaded = true;
     }, function(error) {
       $mdToast.show($mdToast.simple().position('top left').content('Error Getting Application!'));
       console.error(error);

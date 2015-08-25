@@ -59,7 +59,7 @@ opts.inject = {
 };
 
 // concat the injection lists for the html files
-opts.inject.sources = opts.inject.bower.concat(opts.inject.app.concat(opts.inject.exclude))
+opts.inject.sources = opts.inject.bower.concat(opts.inject.app.concat(opts.inject.exclude));
 
 opts.karma = {
   configFile: __dirname + '/karma.conf.js',
@@ -157,7 +157,7 @@ gulp.task('clean', function () {
 });
 
 // Test harness
-gulp.task('webdriver', protractor.webdriver_update)
+gulp.task('webdriver', protractor.webdriver_update);
 
 gulp.task('test', ['test:karma']);
 
@@ -215,7 +215,7 @@ gulp.task('serve:test', ['config'], function() {
     root: 'dist',
     livereload: false,
     port: 3000
-  })
+  });
 });
 
 gulp.task('serve:prod', ['config'], serve({
