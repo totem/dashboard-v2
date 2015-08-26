@@ -183,6 +183,83 @@ angular.module('totemDashboard')
     $window.open('http://' + location.hostname + location.path);
   };
 
+  $scope.$watch('events.events', function (events) {
+    var data = [],
+        clusters = {},
+        newDeploymentEvents = _.where(events, {type: 'NEW_DEPLOYMENT'}),
+        nodesDiscoveredEvents = _.where(events, {type: 'NODES_DISCOVERED'}),
+        deploymentCheckEvents = _.where(events, {type: 'DEPLOYMENT_CHECK_PASSED'}),
+        wiredEvents = _.where(events, {type: 'WIRED'}),
+        promotedEvents = _.where(events, {type: 'PROMOTED'});
+
+    _.each(newDeploymentEvents, function (newDeploymentEvent) {
+      clusters[newDeploymentEvent.metaInfo.deployer.cluster] = {
+        deploy: {start: newDeploymentEvent}
+      };
+    });
+
+    _.each(nodesDiscoveredEvents, function (nodesDiscoveredEvent) {
+      var cluster = clusters[nodesDiscoveredEvent.metaInfo.deployer.cluster];
+      cluster.deploy.end = nodesDiscoveredEvent;
+      cluster.validate = {
+        start: nodesDiscoveredEvent
+      };
+    });
+
+    _.each(deploymentCheckEvents, function (deploymentCheckEvent) {
+      var cluster = clusters[deploymentCheckEvent.metaInfo.deployer.cluster];
+      cluster.validate.end = deploymentCheckEvent;
+      cluster.wire = {
+        start: deploymentCheckEvent
+      };
+    });
+
+    _.each(wiredEvents, function (wiredEvent) {
+      var cluster = clusters[wiredEvent.metaInfo.deployer.cluster];
+      cluster.wire.end = wiredEvent;
+      cluster.cleanup = {
+        start: wiredEvent
+      };
+    });
+
+    _.each(promotedEvents, function (promotedEvent) {
+      clusters[promotedEvent.metaInfo.deployer.cluster].cleanup.end = promotedEvent;
+    });
+
+    _.each(clusters, function (cluster, clusterName) {
+      var row = {
+        name: clusterName,
+        tasks: []
+      };
+
+      _.each(cluster, function (deploymentEvent, eventName) {
+        if (deploymentEvent.end && !deploymentEvent.start) {
+          deploymentEvent.start = deploymentEvent.end;
+        }
+
+        if (deploymentEvent.start && deploymentEvent.end) {
+          row.tasks.push({
+            name: eventName,
+            classes: [eventName],
+            from: deploymentEvent.start.moment,
+            to: deploymentEvent.end.moment
+          });
+        }
+      });
+
+      data.push(row);
+    });
+
+    $scope.ganttData = data;
+
+    try {
+      $scope.ganttTimespan = {
+        from: events[events.length - 1].moment,
+        to: events[0].moment
+      };
+    } catch (err) {}
+  });
+
   $scope.load = function() {
     api.getApplication($stateParams.owner, $stateParams.repo, $stateParams.ref).then(function(results) {
       $scope.application = results;

@@ -83,9 +83,9 @@
           <div flex>
             <h3>Events</h3>
 
-            <ul>
-              <li ng-repeat="event in events.events">{{ event.type | lowercase }} <small class="md-caption">- {{ event.startedAt.fromNow() }}</small></li>
-            </ul>
+            <md-button ng-click="processEvents(events.events)">Process Events</md-button>
+
+            <div gantt data="ganttData" from-date="ganttTimespan.from" to-date="ganttTimespan.to" headers="['day', 'minute']" headers-formats="{day: 'D MMMM YYYY'}" view-scale="'minute'"></div>
           </div>
         </div>
 
