@@ -61,7 +61,7 @@
               </tr>
             </thead>
             <tbody ng-repeat="item in selected.deployment.proxyMeta">
-              <tr ng-repeat="location in item.locations" ng-click="open(location)">
+              <tr ng-repeat="location in item.locations" ng-click="open(location)" ng-if="location.enabled">
                 <td class="mdl-data-table__cell--non-numeric">{{ location.hostname }}</td>
                 <td class="mdl-data-table__cell--non-numeric">{{ location.path }}</td>
                 <td>{{ location.port }}</td>
