@@ -60,10 +60,15 @@ angular.module('totemDashboard')
   };
 
   function getNodes(deployment) {
-    var machines = {};
+    var machines = {},
+        units = deployment.runtime.units;
 
-    for (var i = 0; i < deployment.runtime.units.length; i++) {
-      var unit = deployment.runtime.units[i];
+    if (!units) {
+      return [];
+    }
+
+    for (var i = 0; i < units.length; i++) {
+      var unit = units[i];
 
       if (unit.unit.indexOf('app') === -1) {
         break;
@@ -227,8 +232,9 @@ angular.module('totemDashboard')
     });
 
     _.each(clusters, function (cluster, clusterName) {
-      var row = {
+      var parent = {
         name: clusterName,
+        classes: ['parent-row'],
         tasks: []
       };
 
@@ -238,16 +244,27 @@ angular.module('totemDashboard')
         }
 
         if (deploymentEvent.start && deploymentEvent.end) {
-          row.tasks.push({
-            name: eventName,
-            classes: [eventName],
+          parent.tasks.push({
+            name: '',
+            classes: ['overview-task'],
             from: deploymentEvent.start.moment,
             to: deploymentEvent.end.moment
+          });
+
+          data.push({
+            parent: clusterName,
+            name: eventName,
+            tasks: [{
+              name: eventName,
+              classes: [eventName],
+              from: deploymentEvent.start.moment,
+              to: deploymentEvent.end.moment
+            }]
           });
         }
       });
 
-      data.push(row);
+      data.push(parent);
     });
 
     $scope.ganttData = data;

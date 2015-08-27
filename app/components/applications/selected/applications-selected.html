@@ -79,13 +79,13 @@
           </table>
         </div>
 
-        <div layout="row" layout-sm="column">
+        <div layout="row" layout-sm="column" nd-if="events.events">
           <div flex>
             <h3>Events</h3>
 
-            <md-button ng-click="processEvents(events.events)">Process Events</md-button>
-
-            <div gantt data="ganttData" from-date="ganttTimespan.from" to-date="ganttTimespan.to" headers="['day', 'minute']" headers-formats="{day: 'D MMMM YYYY'}" view-scale="'minute'"></div>
+            <div gantt data="ganttData" from-date="ganttTimespan.from" to-date="ganttTimespan.to" headers="['day', 'hour', 'minute']" headers-formats="{day: 'D MMMM YYYY', hour: 'HH', minute: ':mm'}" view-scale="'minute'">
+              <gantt-tree enabled header-content="''"></gantt-tree>
+            </div>
           </div>
         </div>
 
