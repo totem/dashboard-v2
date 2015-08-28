@@ -186,9 +186,15 @@ angular.module('totemDashboard')
     data.push(parent);
 
     try {
+      var startMoment = events[events.length - 1].moment,
+          endMoment = events[0].moment,
+          jobDuration = endMoment.diff(startMoment, 'minutes');
+
+      $scope.ganttScale = Math.ceil(jobDuration / 12) + ' minutes';
+
       $scope.ganttTimespan = {
-        from: events[events.length - 1].moment,
-        to: events[0].moment
+        from: startMoment,
+        to: endMoment
       };
     } catch (err) {}
   }
