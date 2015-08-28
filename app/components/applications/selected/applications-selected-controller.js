@@ -114,31 +114,45 @@ angular.module('totemDashboard')
         nodesDiscoveredEvent = _.findWhere(events, {type: 'NODES_DISCOVERED', metaInfo: findCluster}),
         deploymentCheckEvent = _.findWhere(events, {type: 'DEPLOYMENT_CHECK_PASSED', metaInfo: findCluster}),
         wiredEvent = _.findWhere(events, {type: 'WIRED', metaInfo: findCluster}),
-        promotedEvent = _.findWhere(events, {type: 'PROMOTED', metaInfo: findCluster});
+        promotedEvent = _.findWhere(events, {type: 'PROMOTED', metaInfo: findCluster}),
+        newJobEvent = _.findWhere(events, {type: 'NEW_JOB'}),
+        deployRequestedEvent = _.findWhere(events, {type: 'DEPLOY_REQUESTED'});
 
     var sortedEvents = {
-      deploy: {
+      'Deploy Application': {
         start: newDeploymentEvent,
         end: nodesDiscoveredEvent
       },
-      validate: {
+      'Validate Application': {
         start: nodesDiscoveredEvent,
         end: deploymentCheckEvent
       },
-      wire: {
+      'Wire Application': {
         start: deploymentCheckEvent,
         end: wiredEvent
       },
-      cleanup: {
+      Cleanup: {
         start: wiredEvent,
         end: promotedEvent
       }
     };
 
+    data.push({
+      name: 'Build + CI',
+      id: 'build-ci',
+      classes: 'build-ci-row',
+      tasks: [{
+        name: 'Build + CI',
+        classes: 'build-ci-task',
+        from: newJobEvent.moment,
+        to: deployRequestedEvent.moment
+      }]
+    });
+
     var parent = {
-      name: clusterName,
+      name: 'Deployment',
       id: clusterName,
-      classes: ['parent-row'],
+      classes: 'parent-row',
       tasks: []
     };
 
@@ -150,7 +164,7 @@ angular.module('totemDashboard')
       if (deploymentEvent.start && deploymentEvent.end) {
         parent.tasks.push({
           name: '',
-          classes: ['overview-task'],
+          classes: 'overview-task',
           from: deploymentEvent.start.moment,
           to: deploymentEvent.end.moment
         });
@@ -161,7 +175,7 @@ angular.module('totemDashboard')
           id: clusterName + '_' + eventName,
           tasks: [{
             name: eventName,
-            classes: [eventName],
+            classes: eventName,
             from: deploymentEvent.start.moment,
             to: deploymentEvent.end.moment
           }]
