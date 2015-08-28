@@ -102,18 +102,6 @@ angular.module('totemDashboard')
       return results[applicationId];
     }
 
-    /**
-      Check under the refs key for decommissioned refs and remove them.
-      Can be used in a chain from accessing the deployment documents.
-    **/
-    function pruneRefs(results) {
-      for (var ref in results.refs) {
-        if (results.refs[ref].deployments[0].state === 'DECOMMISSIONED') {
-          delete results.refs[ref];
-        }
-      }
-    }
-
     this.listApplications = function() {
       /**
         Get a list of all applications. Group them by owner and repo
@@ -146,15 +134,6 @@ angular.module('totemDashboard')
       var body = {
         query: {
           'match_all': {}
-        },
-        filter: {
-          bool: {
-            'must_not': [{
-              term: {
-                state: ['DECOMMISSIONED']
-              }
-            }]
-          }
         }
       };
 
@@ -197,7 +176,6 @@ angular.module('totemDashboard')
 
               return results;
             }, {})
-            .tap(pruneRefs)  // remove any refs where decommissioned is the newest "deployment"
             .map()  // flatten the map into an array
             .value();
 
@@ -292,7 +270,6 @@ angular.module('totemDashboard')
 
               return results;
             }, {})
-            .tap(pruneRefs)
             .value();
 
           deferred.resolve(deployments);
