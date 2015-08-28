@@ -60,33 +60,33 @@ angular.module('totemDashboard')
   };
 
   function getNodes(deployment) {
-    var machines = {};
+    var machines = {},
+        units = deployment.runtime.units,
+        upstreams = deployment.runtime['proxy-upstreams'];
 
-    for (var i = 0; i < deployment.runtime.units.length; i++) {
-      var unit = deployment.runtime.units[i];
-
+    _.each(units, function (unit) {
       if (unit.unit.indexOf('app') === -1) {
-        break;
+        return;
       }
 
       var address = unit.machine.split('/')[1],
-          id = unit.machine.split('/')[0],
-          upstreamKeyArr = unit.unit.split('@'),
-          upstreamKey = upstreamKeyArr[0] + '-' + upstreamKeyArr[1].split('.')[0];
+          id = unit.machine.split('/')[0];
 
       machines[address] = machines[address] || {
         id: id,
         address: address,
         units: [],
-        upstreams: {}
       };
 
-      machines[address].units.push(_.cloneDeep(unit));
+      var clonedUnit = _.cloneDeep(unit);
+      clonedUnit.upstreams = {};
 
-      for (var upstream in deployment.runtime.upstreams) {
-        machines[address].upstreams[upstream] = deployment.runtime.upstreams[upstream][upstreamKey].split(':')[1];
-      }
-    }
+      _.each(upstreams, function (upstream, port) {
+        clonedUnit.upstreams[port] = _.findWhere(upstream, {'service-name': clonedUnit.unit});
+      });
+
+      machines[address].units.push(clonedUnit);
+    });
 
     return _.valuesIn(machines);
   }
