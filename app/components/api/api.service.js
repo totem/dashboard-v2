@@ -66,10 +66,12 @@ angular.module('totemDashboard')
           // test and set
           result[profileName] = result[profileName] || resultItem(hostnames, profileName);
 
-          for (var i = 0; i < hostnames.length; i++) {
-            var locationWithHost = _.cloneDeep(location);
-            locationWithHost.hostname = hostnames[i];
-            result[profileName].locations.push(locationWithHost);
+          if (profile.enabled && location.enabled) {
+            for (var i = 0; i < hostnames.length; i++) {
+              var locationWithHost = _.cloneDeep(location);
+              locationWithHost.hostname = hostnames[i];
+              result[profileName].locations.push(locationWithHost);
+            }
           }
 
         }
