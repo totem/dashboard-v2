@@ -183,7 +183,9 @@ angular.module('totemDashboard')
       }
     });
 
-    data.push(parent);
+    if (parent.tasks.length) {
+      data.push(parent);
+    }
 
     try {
       var startMoment = events[events.length - 1].moment,
