@@ -42,6 +42,7 @@ angular.module('totemDashboard')
 .controller('ApplicationsSelectedContoller', ['$document', '$scope', '$stateParams', '$websocket', '$mdToast', '$window', '$location', 'api', 'logs', function($document, $scope, $stateParams, $websocket, $mdToast, $window, $location, api, logService) {
   $scope.application = null;
   $scope.events = [];
+  $scope.ganttData = [];
   $scope.logs = {
     date: '',
     interval: 5,
@@ -104,6 +105,80 @@ angular.module('totemDashboard')
     }
   }
 
+  function updateEvents (events, clusterName) {
+    var data = $scope.ganttData;
+    data.length = 0;
+
+    var findCluster = {deployer: {cluster: clusterName}},
+        newDeploymentEvent = _.findWhere(events, {type: 'NEW_DEPLOYMENT', metaInfo: findCluster}),
+        nodesDiscoveredEvent = _.findWhere(events, {type: 'NODES_DISCOVERED', metaInfo: findCluster}),
+        deploymentCheckEvent = _.findWhere(events, {type: 'DEPLOYMENT_CHECK_PASSED', metaInfo: findCluster}),
+        wiredEvent = _.findWhere(events, {type: 'WIRED', metaInfo: findCluster}),
+        promotedEvent = _.findWhere(events, {type: 'PROMOTED', metaInfo: findCluster});
+
+    var sortedEvents = {
+      deploy: {
+        start: newDeploymentEvent,
+        end: nodesDiscoveredEvent
+      },
+      validate: {
+        start: nodesDiscoveredEvent,
+        end: deploymentCheckEvent
+      },
+      wire: {
+        start: deploymentCheckEvent,
+        end: wiredEvent
+      },
+      cleanup: {
+        start: wiredEvent,
+        end: promotedEvent
+      }
+    };
+
+    var parent = {
+      name: clusterName,
+      id: clusterName,
+      classes: ['parent-row'],
+      tasks: []
+    };
+
+    _.each(sortedEvents, function (deploymentEvent, eventName) {
+      if (deploymentEvent.end && !deploymentEvent.start) {
+        deploymentEvent.start = deploymentEvent.end;
+      }
+
+      if (deploymentEvent.start && deploymentEvent.end) {
+        parent.tasks.push({
+          name: '',
+          classes: ['overview-task'],
+          from: deploymentEvent.start.moment,
+          to: deploymentEvent.end.moment
+        });
+
+        data.push({
+          parent: clusterName,
+          name: eventName,
+          id: clusterName + '_' + eventName,
+          tasks: [{
+            name: eventName,
+            classes: [eventName],
+            from: deploymentEvent.start.moment,
+            to: deploymentEvent.end.moment
+          }]
+        });
+      }
+    });
+
+    data.push(parent);
+
+    try {
+      $scope.ganttTimespan = {
+        from: events[events.length - 1].moment,
+        to: events[0].moment
+      };
+    } catch (err) {}
+  }
+
   $scope.$watch('selected.deployment', function(deployment) {
     if (_.isUndefined(deployment) || _.isNull(deployment)) {
       return;
@@ -113,6 +188,7 @@ angular.module('totemDashboard')
     deployment.nodes = getNodes(deployment);
 
     api.getJobEvents(deployment.metaInfo.jobId).then(function(results) {
+      updateEvents(results.events, deployment.metaInfo.deployer.name);
       $scope.events = results;
     });
   });
@@ -187,95 +263,6 @@ angular.module('totemDashboard')
   $scope.open = function (location) {
     $window.open('http://' + location.hostname + location.path);
   };
-
-  $scope.$watch('events.events', function (events) {
-    var data = [],
-        clusters = {},
-        newDeploymentEvents = _.where(events, {type: 'NEW_DEPLOYMENT'}),
-        nodesDiscoveredEvents = _.where(events, {type: 'NODES_DISCOVERED'}),
-        deploymentCheckEvents = _.where(events, {type: 'DEPLOYMENT_CHECK_PASSED'}),
-        wiredEvents = _.where(events, {type: 'WIRED'}),
-        promotedEvents = _.where(events, {type: 'PROMOTED'});
-
-    _.each(newDeploymentEvents, function (newDeploymentEvent) {
-      clusters[newDeploymentEvent.metaInfo.deployer.cluster] = {
-        deploy: {start: newDeploymentEvent}
-      };
-    });
-
-    _.each(nodesDiscoveredEvents, function (nodesDiscoveredEvent) {
-      var cluster = clusters[nodesDiscoveredEvent.metaInfo.deployer.cluster];
-      cluster.deploy.end = nodesDiscoveredEvent;
-      cluster.validate = {
-        start: nodesDiscoveredEvent
-      };
-    });
-
-    _.each(deploymentCheckEvents, function (deploymentCheckEvent) {
-      var cluster = clusters[deploymentCheckEvent.metaInfo.deployer.cluster];
-      cluster.validate.end = deploymentCheckEvent;
-      cluster.wire = {
-        start: deploymentCheckEvent
-      };
-    });
-
-    _.each(wiredEvents, function (wiredEvent) {
-      var cluster = clusters[wiredEvent.metaInfo.deployer.cluster];
-      cluster.wire.end = wiredEvent;
-      cluster.cleanup = {
-        start: wiredEvent
-      };
-    });
-
-    _.each(promotedEvents, function (promotedEvent) {
-      clusters[promotedEvent.metaInfo.deployer.cluster].cleanup.end = promotedEvent;
-    });
-
-    _.each(clusters, function (cluster, clusterName) {
-      var parent = {
-        name: clusterName,
-        classes: ['parent-row'],
-        tasks: []
-      };
-
-      _.each(cluster, function (deploymentEvent, eventName) {
-        if (deploymentEvent.end && !deploymentEvent.start) {
-          deploymentEvent.start = deploymentEvent.end;
-        }
-
-        if (deploymentEvent.start && deploymentEvent.end) {
-          parent.tasks.push({
-            name: '',
-            classes: ['overview-task'],
-            from: deploymentEvent.start.moment,
-            to: deploymentEvent.end.moment
-          });
-
-          data.push({
-            parent: clusterName,
-            name: eventName,
-            tasks: [{
-              name: eventName,
-              classes: [eventName],
-              from: deploymentEvent.start.moment,
-              to: deploymentEvent.end.moment
-            }]
-          });
-        }
-      });
-
-      data.push(parent);
-    });
-
-    $scope.ganttData = data;
-
-    try {
-      $scope.ganttTimespan = {
-        from: events[events.length - 1].moment,
-        to: events[0].moment
-      };
-    } catch (err) {}
-  });
 
   $scope.load = function() {
     api.getApplication($stateParams.owner, $stateParams.repo, $stateParams.ref).then(function(results) {
