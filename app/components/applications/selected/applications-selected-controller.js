@@ -142,7 +142,7 @@ angular.module('totemDashboard')
       id: 'build-ci',
       classes: 'build-ci-row',
       tasks: [{
-        name: 'Build + CI',
+        name: moment.duration(deployRequestedEvent.moment.diff(newJobEvent.moment)).humanize(),
         classes: 'build-ci-task',
         from: newJobEvent.moment,
         to: deployRequestedEvent.moment
@@ -162,22 +162,25 @@ angular.module('totemDashboard')
       }
 
       if (deploymentEvent.start && deploymentEvent.end) {
+        var taskStart = deploymentEvent.start.moment,
+            taskEnd = deploymentEvent.end.moment;
+
         parent.tasks.push({
           name: '',
           classes: 'overview-task',
-          from: deploymentEvent.start.moment,
-          to: deploymentEvent.end.moment
+          from: taskStart,
+          to: taskEnd
         });
 
         data.push({
           parent: clusterName,
           name: eventName,
-          id: clusterName + '_' + eventName,
+          id: clusterName + '.' + eventName,
           tasks: [{
-            name: eventName,
+            name: moment.duration(taskEnd.diff(taskStart)).humanize(),
             classes: eventName,
-            from: deploymentEvent.start.moment,
-            to: deploymentEvent.end.moment
+            from: taskStart,
+            to: taskEnd
           }]
         });
       }

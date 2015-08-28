@@ -63,6 +63,12 @@ h1 {
 
 .gantt-task-content {
   color: white;
+  overflow: visible;
+  text-shadow:
+   -1px -1px 0 rgb(63,81,181),
+    1px -1px 0 rgb(63,81,181),
+    -1px 1px 0 rgb(63,81,181),
+     1px 1px 0 rgb(63,81,181);
 }
 
 .gantt-task-background {
