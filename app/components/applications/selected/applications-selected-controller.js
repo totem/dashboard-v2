@@ -42,6 +42,7 @@ angular.module('totemDashboard')
 .controller('ApplicationsSelectedContoller', ['$document', '$scope', '$stateParams', '$websocket', '$mdToast', '$window', '$location', 'api', 'logs', function($document, $scope, $stateParams, $websocket, $mdToast, $window, $location, api, logService) {
   $scope.application = null;
   $scope.events = [];
+  $scope.ganttData = [];
   $scope.logs = {
     date: '',
     interval: 5,
@@ -60,33 +61,37 @@ angular.module('totemDashboard')
   };
 
   function getNodes(deployment) {
-    var machines = {};
+    var machines = {},
+        units = deployment.runtime.units,
+        upstreams = deployment.runtime['proxy-upstreams'];
 
-    for (var i = 0; i < deployment.runtime.units.length; i++) {
-      var unit = deployment.runtime.units[i];
+    if (!units) {
+      return [];
+    }
 
+    _.each(units, function (unit) {
       if (unit.unit.indexOf('app') === -1) {
-        break;
+        return [];
       }
 
       var address = unit.machine.split('/')[1],
-          id = unit.machine.split('/')[0],
-          upstreamKeyArr = unit.unit.split('@'),
-          upstreamKey = upstreamKeyArr[0] + '-' + upstreamKeyArr[1].split('.')[0];
+          id = unit.machine.split('/')[0];
 
       machines[address] = machines[address] || {
         id: id,
         address: address,
         units: [],
-        upstreams: {}
       };
 
-      machines[address].units.push(_.cloneDeep(unit));
+      var clonedUnit = _.cloneDeep(unit);
+      clonedUnit.upstreams = {};
 
-      for (var upstream in deployment.runtime.upstreams) {
-        machines[address].upstreams[upstream] = deployment.runtime.upstreams[upstream][upstreamKey].split(':')[1];
-      }
-    }
+      _.each(upstreams, function (upstream, port) {
+        clonedUnit.upstreams[port] = _.findWhere(upstream, {'service-name': clonedUnit.unit});
+      });
+
+      machines[address].units.push(clonedUnit);
+    });
 
     return _.valuesIn(machines);
   }
@@ -99,6 +104,105 @@ angular.module('totemDashboard')
     }
   }
 
+  function updateEvents (events, clusterName) {
+    var data = $scope.ganttData;
+    data.length = 0;
+
+    var findCluster = {deployer: {cluster: clusterName}},
+        newDeploymentEvent = _.findWhere(events, {type: 'NEW_DEPLOYMENT', metaInfo: findCluster}),
+        nodesDiscoveredEvent = _.findWhere(events, {type: 'NODES_DISCOVERED', metaInfo: findCluster}),
+        deploymentCheckEvent = _.findWhere(events, {type: 'DEPLOYMENT_CHECK_PASSED', metaInfo: findCluster}),
+        wiredEvent = _.findWhere(events, {type: 'WIRED', metaInfo: findCluster}),
+        promotedEvent = _.findWhere(events, {type: 'PROMOTED', metaInfo: findCluster}),
+        newJobEvent = _.findWhere(events, {type: 'NEW_JOB'}),
+        deployRequestedEvent = _.findWhere(events, {type: 'DEPLOY_REQUESTED'});
+
+    var sortedEvents = {
+      'Deploy Application': {
+        start: newDeploymentEvent,
+        end: nodesDiscoveredEvent
+      },
+      'Validate Application': {
+        start: nodesDiscoveredEvent,
+        end: deploymentCheckEvent
+      },
+      'Wire Application': {
+        start: deploymentCheckEvent,
+        end: wiredEvent
+      },
+      Cleanup: {
+        start: wiredEvent,
+        end: promotedEvent
+      }
+    };
+
+    data.push({
+      name: 'Build + CI',
+      id: 'build-ci',
+      classes: 'build-ci-row',
+      tasks: [{
+        name: moment.duration(deployRequestedEvent.moment.diff(newJobEvent.moment)).humanize(),
+        classes: 'build-ci-task',
+        from: newJobEvent.moment,
+        to: deployRequestedEvent.moment
+      }]
+    });
+
+    var parent = {
+      name: 'Deployment',
+      id: clusterName,
+      classes: 'parent-row',
+      tasks: []
+    };
+
+    _.each(sortedEvents, function (deploymentEvent, eventName) {
+      if (deploymentEvent.end && !deploymentEvent.start) {
+        deploymentEvent.start = deploymentEvent.end;
+      }
+
+      if (deploymentEvent.start && deploymentEvent.end) {
+        var taskStart = deploymentEvent.start.moment,
+            taskEnd = deploymentEvent.end.moment;
+
+        parent.tasks.push({
+          name: '',
+          classes: 'overview-task',
+          from: taskStart,
+          to: taskEnd
+        });
+
+        data.push({
+          parent: clusterName,
+          name: eventName,
+          id: clusterName + '.' + eventName,
+          tasks: [{
+            name: moment.duration(taskEnd.diff(taskStart)).humanize(),
+            classes: eventName,
+            from: taskStart,
+            to: taskEnd
+          }]
+        });
+      }
+    });
+
+    if (parent.tasks.length) {
+      data.push(parent);
+    }
+
+    try {
+      var startMoment = events[events.length - 1].moment,
+          endMoment = events[0].moment,
+          jobDuration = endMoment.diff(startMoment, 'minutes');
+
+      $scope.ganttScale = Math.ceil(jobDuration / 12) + ' minutes';
+
+      $scope.ganttTimespan = {
+        from: startMoment,
+        to: endMoment
+      };
+    } catch (err) {}
+  }
+
   $scope.$watch('selected.deployment', function(deployment) {
     if (_.isUndefined(deployment) || _.isNull(deployment)) {
       return;
@@ -108,6 +212,7 @@ angular.module('totemDashboard')
     deployment.nodes = getNodes(deployment);
 
     api.getJobEvents(deployment.metaInfo.jobId).then(function(results) {
+      updateEvents(results.events, deployment.metaInfo.deployer.name);
       $scope.events = results;
     });
   });

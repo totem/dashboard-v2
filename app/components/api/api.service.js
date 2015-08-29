@@ -31,7 +31,13 @@ angular.module('totemDashboard')
       source.metaInfo = source['meta-info'];
       source.metaInfo.jobId = source.metaInfo['job-id'];
 
-      source.startedAt = moment(source['started-at'], 'YYYY-MM-DDTHH:mm:ss');
+      var format = 'YYYY-MM-DDTHH:mm:ss.SSSSSSZ';
+
+      if (source['started-at']) {
+        source.startedAt = moment(source['started-at'], format);
+      }
+
+      source.moment = moment(source.date, format);
 
       return source;
     }
@@ -66,10 +72,12 @@ angular.module('totemDashboard')
           // test and set
           result[profileName] = result[profileName] || resultItem(hostnames, profileName);
 
-          for (var i = 0; i < hostnames.length; i++) {
-            var locationWithHost = _.cloneDeep(location);
-            locationWithHost.hostname = hostnames[i];
-            result[profileName].locations.push(locationWithHost);
+          if (profile.enabled && location.enabled) {
+            for (var i = 0; i < hostnames.length; i++) {
+              var locationWithHost = _.cloneDeep(location);
+              locationWithHost.hostname = hostnames[i];
+              result[profileName].locations.push(locationWithHost);
+            }
           }
 
         }
@@ -100,18 +108,6 @@ angular.module('totemDashboard')
       }
 
       return results[applicationId];
-    }
-
-    /**
-      Check under the refs key for decommissioned refs and remove them.
-      Can be used in a chain from accessing the deployment documents.
-    **/
-    function pruneRefs(results) {
-      for (var ref in results.refs) {
-        if (results.refs[ref].deployments[0].state === 'DECOMMISSIONED') {
-          delete results.refs[ref];
-        }
-      }
     }
 
     this.listApplications = function() {
@@ -146,15 +142,6 @@ angular.module('totemDashboard')
       var body = {
         query: {
           'match_all': {}
-        },
-        filter: {
-          bool: {
-            'must_not': [{
-              term: {
-                state: ['DECOMMISSIONED']
-              }
-            }]
-          }
         }
       };
 
@@ -197,7 +184,6 @@ angular.module('totemDashboard')
 
               return results;
             }, {})
-            .tap(pruneRefs)  // remove any refs where decommissioned is the newest "deployment"
             .map()  // flatten the map into an array
             .value();
 
@@ -292,7 +278,6 @@ angular.module('totemDashboard')
 
               return results;
             }, {})
-            .tap(pruneRefs)
             .value();
 
           deferred.resolve(deployments);
