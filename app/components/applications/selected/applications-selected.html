@@ -98,20 +98,13 @@
               <strong>Machine Address:</strong> {{ node.address }}
             </p>
 
-            <h5>Upstreams</h5>
-
-            <p>
-              <span ng-repeat="(upstream, port) in node.upstreams">
-                <strong>{{ upstream }}:</strong> {{ port }}<br />
-              </span>
-            </p>
-
             <h5>Units</h5>
 
             <p ng-repeat="unit in node.units">
               <strong>Unit:</strong> {{ unit.unit }}<br />
               <strong>Active:</strong> {{ unit.active }}<br />
-              <strong>Status:</strong> {{ unit.sub }}
+              <strong>Status:</strong> {{ unit.sub }}<br />
+              <strong>Ports:</strong><span ng-repeat="(port, upstream) in unit.upstreams"> <a ng-href="http://{{ upstream.endpoint }}" target="_blank">{{ port }}</a></span>
             </p>
           </div>
         </div>
