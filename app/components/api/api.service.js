@@ -31,7 +31,13 @@ angular.module('totemDashboard')
       source.metaInfo = source['meta-info'];
       source.metaInfo.jobId = source.metaInfo['job-id'];
 
-      source.startedAt = moment(source['started-at'], 'YYYY-MM-DDTHH:mm:ss');
+      var format = 'YYYY-MM-DDTHH:mm:ss.SSSSSSZ';
+
+      if (source['started-at']) {
+        source.startedAt = moment(source['started-at'], format);
+      }
+
+      source.moment = moment(source.date, format);
 
       return source;
     }
