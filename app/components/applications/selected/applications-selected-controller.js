@@ -39,7 +39,7 @@ angular.module('totemDashboard')
   };
 })
 
-.controller('ApplicationsSelectedContoller', ['$document', '$scope', '$stateParams', '$websocket', '$mdToast', '$window', '$location', 'api', 'logs', function($document, $scope, $stateParams, $websocket, $mdToast, $window, $location, api, logService) {
+.controller('ApplicationsSelectedContoller', ['$document', '$scope', '$stateParams', '$websocket', '$mdToast', '$mdDialog', '$window', '$location', 'api', 'logs', function($document, $scope, $stateParams, $websocket, $mdToast, $mdDialog, $window, $location, api, logService) {
   $scope.application = null;
   $scope.events = [];
   $scope.ganttData = [];
@@ -276,11 +276,24 @@ angular.module('totemDashboard')
     });
   };
 
-  $scope.deleteDeployment = function (deployment) {
+  function deleteDeployment (deployment) {
     $scope.working = true;
     api.deleteDeployment(deployment.deployment.name, deployment.metaInfo.deployer.url).then(function () {
       $scope.working = false;
       $scope.selected.deployment.decomissionStarted = true;
+    });
+  }
+
+  $scope.deleteDialog = function (event, deployment) {
+    var confirm = $mdDialog.confirm()
+          .title('Confirm decommission')
+          .content('Are you sure you want to decommission this deployment?')
+          .ok('Yes')
+          .cancel('No')
+          .targetEvent(event);
+
+    $mdDialog.show(confirm).then(function() {
+      deleteDeployment(deployment);
     });
   };
 
