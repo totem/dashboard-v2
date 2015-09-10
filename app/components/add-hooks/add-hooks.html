@@ -1,0 +1,23 @@
+<md-content>
+  <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored" ng-click="authGithub()" ng-if="!$storage.githubAuthToken">
+    Login with GitHub
+  </button>
+
+  <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored" ng-click="logout()" ng-if="$storage.githubAuthToken">
+    Logout of GitHub
+  </button>
+
+  <form ng-submit="addHooks(user, repo)" layout="row" layout-sm="column">
+    <md-input-container flex="20">
+      <label>User/Org</label>
+      <input type="text" ng-model="user"  />
+    </md-input-container>
+
+    <md-input-container flex="20">
+      <label>Repo</label>
+      <input type="text" ng-model="repo"  />
+    </md-input-container>
+
+    <input type="submit" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" value="Add Hooks"  />
+  </form>
+</md-content>

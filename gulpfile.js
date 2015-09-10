@@ -41,6 +41,7 @@ opts.inject = {
     'app/bower/angular-gantt/assets/angular-gantt-plugins.js',
     'app/bower/angular-moment/angular-moment.js',
     'app/bower/angular-material/angular-material.js',
+    'app/bower/ngstorage/ngStorage.js',
     'app/bower/elasticsearch/elasticsearch.angular.js',
     'app/bower/json-formatter/dist/json-formatter.js',
     'app/bower/DateJS/build/production/date.min.js'
