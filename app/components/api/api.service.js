@@ -1,7 +1,7 @@
 (function () {
 'use strict';
 
-/*jshint strict: true */
+/*jshint strict: true, camelcase: false */
 /*globals _,angular,moment*/
 
 angular.module('totemDashboard')
@@ -289,6 +289,18 @@ angular.module('totemDashboard')
 
     this.deleteDeployment = function (appName, deployerUrl) {
       return $http.delete(deployerUrl + '/apps/' + appName);
+    };
+
+    this.cloneDeployment = function (appName, version, deployerUrl) {
+      var deferred = $q.defer();
+
+      window.setTimeout(function () {
+        deferred.resolve();
+      }, 5000);
+
+      return deferred.promise;
+
+      // return $http.post(deployerUrl + '/apps/' + appName + '/versions/' + version + '/state');
     };
 
     this.getJobEvents = function(jobId) {

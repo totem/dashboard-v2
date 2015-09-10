@@ -276,6 +276,13 @@ angular.module('totemDashboard')
     });
   };
 
+  $scope.cloneDeployment = function (deployment) {
+    $scope.working = true;
+    api.cloneDeployment(deployment.deployment.name, deployment.deployment.version, deployment.metaInfo.deployer.url).then(function () {
+      $scope.working = false;
+    });
+  };
+
   $scope.deleteDeployment = function (deployment) {
     $scope.working = true;
     api.deleteDeployment(deployment.deployment.name, deployment.metaInfo.deployer.url).then(function () {
