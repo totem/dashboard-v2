@@ -299,7 +299,6 @@ angular.module('totemDashboard')
       }, 5000);
 
       return deferred.promise;
-
       // return $http.post(deployerUrl + '/apps/' + appName + '/versions/' + version + '/state');
     };
 
