@@ -142,7 +142,8 @@ gulp.task('config', ['assemble'], function () {
       name: 'totemDashboard',
       deps: false,
       constants: {
-        totemConfigUrl: process.env.TOTEM_DASHBOARD_CONFIG
+        dashboardConfigUrl: process.env.TOTEM_DASHBOARD_CONFIG,
+        servicesConfigUrl: process.env.TOTEM_SERVICES_CONFIG
       }
     }))
     // Writes config.js to dist/ folder

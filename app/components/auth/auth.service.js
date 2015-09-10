@@ -3,14 +3,14 @@
 'use strict';
 
 angular.module('totemDashboard')
-.service('githubAuth', ['$q', '$window', function ($q, $window) {
+.service('githubAuth', ['$q', '$window', 'totemServices', function ($q, $window, totemServices) {
 
   /**
    * Vars
    */
   var
     self = this,
-    baseUrl = 'https://c8cab2fe.ngrok.io',
+    baseUrl = totemServices.configurator.href.value,
     authDeferred,
     authInProgress,
     authWindowIntervalId;

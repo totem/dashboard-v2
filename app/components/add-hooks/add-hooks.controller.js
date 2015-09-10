@@ -18,7 +18,7 @@ angular.module('totemDashboard')
     });
 }])
 
-.controller('AddHooksController', ['$scope', '$http', '$localStorage', 'githubAuth', function($scope, $http, $localStorage, githubAuth) {
+.controller('AddHooksController', ['$scope', '$http', '$localStorage', 'githubAuth', 'totemServices', function($scope, $http, $localStorage, githubAuth, totemServices) {
   $scope.$storage = $localStorage;
   $scope.authError = false;
 
@@ -39,7 +39,7 @@ angular.module('totemDashboard')
   $scope.addHooks = function (user, repo) {
     var req = {
       method: 'POST',
-      url: 'https://c8cab2fe.ngrok.io/add/' + user + '/' + repo,
+      url: totemServices.configurator.href.value + '/add/' + user + '/' + repo,
       headers: {
         Authorization: 'Bearer ' + $scope.$storage.githubAuthToken
       }
