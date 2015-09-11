@@ -299,7 +299,7 @@ angular.module('totemDashboard')
       }, 5000);
 
       return deferred.promise;
-      // return $http.post(deployerUrl + '/apps/' + appName + '/versions/' + version + '/state');
+      // return $http.patch(deployerUrl + '/apps/' + appName + '/versions/' + version, {state: 'NEW'});
     };
 
     this.getJobEvents = function(jobId) {
