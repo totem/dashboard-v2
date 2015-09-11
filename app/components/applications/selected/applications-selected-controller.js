@@ -288,11 +288,11 @@ angular.module('totemDashboard')
     var confirm = $mdDialog.confirm()
           .title('Confirm decommission')
           .content('Are you sure you want to decommission this deployment?')
-          .ok('Yes')
-          .cancel('No')
+          .ok('No') // Swapping here to make "no" the default
+          .cancel('Yes')
           .targetEvent(event);
 
-    $mdDialog.show(confirm).then(function() {
+    $mdDialog.show(confirm).catch(function () {
       deleteDeployment(deployment);
     });
   };
