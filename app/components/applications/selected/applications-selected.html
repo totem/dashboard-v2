@@ -5,7 +5,7 @@
     <md-button class="md-raised md-primary" ng-click="">
       Clone
     </md-button>
-    <md-button class="md-raised md-warn" ng-click="deleteDeployment(selected.deployment)">
+    <md-button class="md-raised md-warn" ng-click="deleteDialog($event, selected.deployment)" ng-disabled="selected.deployment.state !== 'PROMOTED'">
       <md-tooltip>Decomission deployment</md-tooltip>
       <md-icon class="material-icons">delete</md-icon>
     </md-button>
