@@ -12,9 +12,10 @@
   </div>
 </md-toolbar>
 
-<md-toolbar class="md-accent" ng-if="working">
+<md-toolbar class="md-accent" ng-if="working || !loaded">
   <div class="md-toolbar-tools">
-    <h3>Working </h3>
+    <h3 ng-if="working">Working&hellip;</h3>
+    <h3 ng-if="!loaded">Loading&hellip;</h3>
     <md-progress-circular md-mode="indeterminate" md-diameter="30"></md-progress-circular>
   </div>
 </md-toolbar>
@@ -39,14 +40,14 @@
   </md-switch>
 </div>
 
-<div layout="column" flex="" layout-fill="">
+<div layout="column" flex="" layout-fill="" ng-if="loaded">
   <md-tabs md-dynamic-height md-border-bottom>
     <md-tab label="Summary">
       <md-content layout-padding>
         <div layout="row" layout-sm="column">
-          <h3>{{ application.ref.name }} ({{ selected.deployment.state | lowercase }})</h3>
+          <h3>{{ application.ref.name }} ({{ selected.deployment.state | lowercase }} {{ selected.deployment.stateUpdated.fromNow() }})</h3>
           <md-select ng-model="selected.deployment" style="margin-left: 20px;" placeholder="Change Deployment" style="min-width: 200px;">
-            <md-option ng-value="deploy" ng-repeat="deploy in application.ref.deployments">{{deploy.id}} {{ deploy.state | lowercase }}</md-option>
+            <md-option ng-value="deploy" ng-repeat="deploy in application.ref.deployments">{{deploy.id}} {{ deploy.state | lowercase }} {{ deploy.stateUpdated.fromNow() }}</md-option>
           </md-select>
         </div>
 

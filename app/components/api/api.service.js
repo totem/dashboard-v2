@@ -37,6 +37,10 @@ angular.module('totemDashboard')
         source.startedAt = moment(source['started-at'], format);
       }
 
+      if (source['state-updated']) {
+        source.stateUpdated = moment(source['state-updated'], format);
+      }
+
       source.moment = moment(source.date, format);
 
       return source;
