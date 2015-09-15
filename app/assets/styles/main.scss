@@ -115,3 +115,9 @@ h1 {
 md-tabs {
   height: calc(100vh - 128px);
 }
+
+md-fab-speed-dial {
+  position: fixed;
+  bottom: 40px;
+  right: 40px;
+}

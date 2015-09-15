@@ -1,29 +1,32 @@
 <md-toolbar class="md-primary md-hue-1">
   <div class="md-toolbar-tools">
-    <h1><strong>{{ application.owner }} / {{ application.repo }}</strong></h1>
+    <h1><strong>{{ application.owner }} / {{ application.repo }} / {{ application.ref.name }}</strong></h1>
+    <small>&nbsp;(<a ng-href="{{ getCommitLink(selected.deployment) }}" target="_blank"><code>{{ selected.deployment.metaInfo.git.commit.substr(0, 5) }}</code></a>)</small>
     <span flex></span>
-    <md-fab-speed-dial md-direction="left" class="md-fling" md-open="fabIsOpen" ng-mouseenter="fabIsOpen = true" ng-mouseleave="fabIsOpen = false">
-      <md-fab-trigger>
-        <md-button class="md-fab">
-          <md-icon class="material-icons">more_horiz</md-icon>
-        </md-button>
-      </md-fab-trigger>
-      <md-fab-actions>
-        <md-button class="md-fab md-primary" ng-click="toggleSidenav()">
-          <md-tooltip>Open deployment menu</md-tooltip>
-          <md-icon class="material-icons">menu</md-icon>
-        </md-button>
-        <md-button class="md-raised md-warn md-fab" ng-click="deleteDialog($event, selected.deployment)" ng-disabled="selected.deployment.state !== 'PROMOTED'">
-          <md-tooltip>Decomission deployment</md-tooltip>
-          <md-icon class="material-icons">delete</md-icon>
-        </md-button>
-        <md-button class="md-raised md-primary md-fab" ng-click="">
-          <md-tooltip>Clone deployment</md-tooltip>
-          <md-icon class="material-icons">refresh</md-icon>
-        </md-button>
-      </md-fab-actions>
-    </md-fab-speed-dial>
+    <h2>{{ getTiming(selected.deployment) }}</h2>
   </div>
+
+  <md-fab-speed-dial md-direction="left" class="md-fling" md-open="fabIsOpen" ng-mouseenter="fabIsOpen = true" ng-mouseleave="fabIsOpen = false">
+    <md-fab-trigger>
+      <md-button class="md-fab">
+        <md-icon class="material-icons">more_horiz</md-icon>
+      </md-button>
+    </md-fab-trigger>
+    <md-fab-actions>
+      <md-button class="md-fab md-primary" ng-click="toggleSidenav()">
+        <md-tooltip>Open deployment menu</md-tooltip>
+        <md-icon class="material-icons">menu</md-icon>
+      </md-button>
+      <md-button class="md-raised md-warn md-fab" ng-click="deleteDialog($event, selected.deployment)" ng-disabled="selected.deployment.state !== 'PROMOTED'">
+        <md-tooltip>Decomission deployment</md-tooltip>
+        <md-icon class="material-icons">delete</md-icon>
+      </md-button>
+      <md-button class="md-raised md-primary md-fab" ng-click="">
+        <md-tooltip>Clone deployment</md-tooltip>
+        <md-icon class="material-icons">refresh</md-icon>
+      </md-button>
+    </md-fab-actions>
+  </md-fab-speed-dial>
 </md-toolbar>
 
 <md-toolbar class="md-accent" ng-if="working || !loaded">
@@ -54,7 +57,7 @@
   </md-switch>
 </div>
 
-<div layout="row">
+<div layout="row" ng-if="loaded">
   <md-sidenav class="md-sidenav-left md-whiteframe-z2" md-component-id="left">
     <md-toolbar class="md-primary md-hue-2">
       <div class="md-toolbar-tools">
@@ -65,8 +68,9 @@
     <md-content class="md-padding">
       <md-radio-group ng-model="selected.deployment" class="md-primary">
         <md-radio-button ng-repeat="deploy in application.ref.deployments" ng-value="deploy" ng-click="toggleSidenav()">
-          <code>{{ deploy.metaInfo.git.commit.substr(0, 5) }}</code><br />
-          <small>{{ getTiming(deploy) }}</small>
+          {{ getTiming(deploy) }}<br />
+
+          <small><code>{{ deploy.metaInfo.git.commit.substr(0, 5) }}</code></small>
         </md-radio-button>
       </md-radio-group>
     </md-content>
@@ -76,14 +80,6 @@
     <md-tabs md-align-tabs="bottom">
       <md-tab label="Summary">
         <md-content class="md-padding">
-          <div layout="row" layout-sm="column">
-            <h3>
-              {{ application.ref.name }}
-              ({{ getTiming(selected.deployment) }})
-              <a ng-href="{{ getCommitLink(selected.deployment) }}" target="_blank"><code>{{ selected.deployment.metaInfo.git.commit.substr(0, 5) }}</code></a>
-            </h3>
-          </div>
-
           <div layout="row" layout-sm="column">
             <table class="mdl-data-table mdl-js-data-table" width="100%">
               <thead>

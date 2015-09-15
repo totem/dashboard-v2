@@ -323,7 +323,7 @@ angular.module('totemDashboard')
     switch (deployment.state) {
       case 'PROMOTED':
         diff = moment.duration(moment().diff(stateUpdated)).humanize();
-        message = 'up ' + diff;
+        message = 'up for ' + diff;
         break;
       case 'DECOMMISSIONED':
         message = 'stopped ' + diff;
@@ -333,6 +333,10 @@ angular.module('totemDashboard')
         break;
       case 'STARTED':
         message = 'started ' + diff;
+        break;
+      case 'NEW':
+        message = 'created ' + diff;
+        break;
     }
 
     return message;
