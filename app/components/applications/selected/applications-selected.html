@@ -26,9 +26,10 @@
   </div>
 </md-toolbar>
 
-<md-toolbar class="md-accent" ng-if="working">
+<md-toolbar class="md-accent" ng-if="working || !loaded">
   <div class="md-toolbar-tools">
-    <h3>Working </h3>
+    <h3 ng-if="working">Working&hellip;</h3>
+    <h3 ng-if="!loaded">Loading&hellip;</h3>
     <md-progress-circular md-mode="indeterminate" md-diameter="30"></md-progress-circular>
   </div>
 </md-toolbar>

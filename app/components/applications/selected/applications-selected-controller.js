@@ -214,6 +214,7 @@ angular.module('totemDashboard')
     api.getJobEvents(deployment.metaInfo.jobId).then(function(results) {
       updateEvents(results.events, deployment.metaInfo.deployer.name);
       $scope.events = results;
+      $scope.loaded = true;
     });
   });
 
@@ -359,8 +360,6 @@ angular.module('totemDashboard')
       try {
         $scope.selected.deployment = results.ref.deployments[0];
       } catch (err) {}
-
-      $scope.loaded = true;
     }, function(error) {
       $mdToast.show($mdToast.simple().position('top left').content('Error Getting Application!'));
       console.error(error);
