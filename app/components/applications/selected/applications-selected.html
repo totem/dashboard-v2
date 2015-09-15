@@ -45,9 +45,9 @@
     <md-tab label="Summary">
       <md-content layout-padding>
         <div layout="row" layout-sm="column">
-          <h3>{{ application.ref.name }} ({{ selected.deployment.state | lowercase }})</h3>
+          <h3>{{ application.ref.name }} ({{ selected.deployment.state | lowercase }} {{ selected.deployment.stateUpdated.fromNow() }})</h3>
           <md-select ng-model="selected.deployment" style="margin-left: 20px;" placeholder="Change Deployment" style="min-width: 200px;">
-            <md-option ng-value="deploy" ng-repeat="deploy in application.ref.deployments">{{deploy.id}} {{ deploy.state | lowercase }}</md-option>
+            <md-option ng-value="deploy" ng-repeat="deploy in application.ref.deployments">{{deploy.id}} {{ deploy.state | lowercase }} {{ deploy.stateUpdated.fromNow() }}</md-option>
           </md-select>
         </div>
 

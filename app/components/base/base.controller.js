@@ -2,7 +2,7 @@
 'use strict';
 
 /*jshint strict: true */
-/*globals angular, moment*/
+/*globals angular*/
 
 angular.module('totemDashboard')
   .config(['$stateProvider', function ($stateProvider) {
@@ -20,7 +20,6 @@ angular.module('totemDashboard')
       });
   }])
 
-  .controller('BaseController', ['$scope', function ($scope) {
-    $scope.moment = moment;
-  }]);
+  .controller('BaseController', function () {
+  });
 })();
