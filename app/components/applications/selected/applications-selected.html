@@ -1,14 +1,28 @@
 <md-toolbar class="md-primary md-hue-1">
   <div class="md-toolbar-tools">
-    <h2>{{ application.owner }}/{{ application.repo }}</h2>
+    <h1><strong>{{ application.owner }} / {{ application.repo }}</strong></h1>
     <span flex></span>
-    <md-button class="md-raised md-primary" ng-click="">
-      Clone
-    </md-button>
-    <md-button class="md-raised md-warn" ng-click="deleteDialog($event, selected.deployment)" ng-disabled="selected.deployment.state !== 'PROMOTED'">
-      <md-tooltip>Decomission deployment</md-tooltip>
-      <md-icon class="material-icons">delete</md-icon>
-    </md-button>
+    <md-fab-speed-dial md-direction="left" class="md-fling" md-open="fabIsOpen" ng-mouseenter="fabIsOpen = true" ng-mouseleave="fabIsOpen = false">
+      <md-fab-trigger>
+        <md-button class="md-fab">
+          <md-icon class="material-icons">more_horiz</md-icon>
+        </md-button>
+      </md-fab-trigger>
+      <md-fab-actions>
+        <md-button class="md-fab md-primary" ng-click="toggleSidenav()">
+          <md-tooltip>Open deployment menu</md-tooltip>
+          <md-icon class="material-icons">menu</md-icon>
+        </md-button>
+        <md-button class="md-raised md-warn md-fab" ng-click="deleteDialog($event, selected.deployment)" ng-disabled="selected.deployment.state !== 'PROMOTED'">
+          <md-tooltip>Decomission deployment</md-tooltip>
+          <md-icon class="material-icons">delete</md-icon>
+        </md-button>
+        <md-button class="md-raised md-primary md-fab" ng-click="">
+          <md-tooltip>Clone deployment</md-tooltip>
+          <md-icon class="material-icons">refresh</md-icon>
+        </md-button>
+      </md-fab-actions>
+    </md-fab-speed-dial>
   </div>
 </md-toolbar>
 
@@ -40,7 +54,7 @@
 </div>
 
 <div layout="row">
-  <md-sidenav class="md-sidenav-left md-whiteframe-z2" md-component-id="left" md-is-locked-open="true">
+  <md-sidenav class="md-sidenav-left md-whiteframe-z2" md-component-id="left">
     <md-toolbar class="md-primary md-hue-2">
       <div class="md-toolbar-tools">
         <h3>Select deployment</h3>
@@ -49,20 +63,24 @@
 
     <md-content class="md-padding">
       <md-radio-group ng-model="selected.deployment" class="md-primary">
-        <md-radio-button ng-repeat="deploy in application.ref.deployments" ng-value="deploy">
-          {{ deploy.id.split('-')[deploy.id.split('-').length - 1] }}<br />
-          <small>{{ deploy.state | lowercase }}</small>
+        <md-radio-button ng-repeat="deploy in application.ref.deployments" ng-value="deploy" ng-click="toggleSidenav()">
+          <code>{{ deploy.metaInfo.git.commit.substr(0, 5) }}</code><br />
+          <small>{{ getTiming(deploy) }}</small>
         </md-radio-button>
       </md-radio-group>
     </md-content>
   </md-sidenav>
 
   <div layout="column" layout-fill>
-    <md-tabs md-dynamic-height md-border-bottom>
+    <md-tabs md-align-tabs="bottom">
       <md-tab label="Summary">
         <md-content class="md-padding">
           <div layout="row" layout-sm="column">
-            <h3>{{ application.ref.name }} ({{ selected.deployment.state | lowercase }})</h3>
+            <h3>
+              {{ application.ref.name }}
+              ({{ getTiming(selected.deployment) }})
+              <a ng-href="{{ getCommitLink(selected.deployment) }}" target="_blank"><code>{{ selected.deployment.metaInfo.git.commit.substr(0, 5) }}</code></a>
+            </h3>
           </div>
 
           <div layout="row" layout-sm="column">
@@ -73,10 +91,11 @@
                   <th class="mdl-data-table__cell--non-numeric">Path</th>
                   <th class="mdl-data-table__cell--non-numeric">Port</th>
                   <th class="mdl-data-table__cell--non-numeric">Privacy</th>
+                  <th class="mdl-data-table__cell--non-numeric">Go</th>
                 </tr>
               </thead>
               <tbody ng-repeat="item in selected.deployment.proxyMeta">
-                <tr ng-repeat="location in item.locations" ng-click="open(location)">
+                <tr ng-repeat="location in item.locations">
                   <td class="mdl-data-table__cell--non-numeric">{{ location.hostname }}</td>
                   <td class="mdl-data-table__cell--non-numeric">{{ location.path }}</td>
                   <td class="mdl-data-table__cell--non-numeric">{{ location.port }}</td>
@@ -87,6 +106,11 @@
                       </md-tooltip>
                       <md-icon ng-if="isPublicACL(location)" class="material-icons">lock_open</md-icon>
                       <md-icon ng-if="!isPublicACL(location)" class="material-icons">lock</md-icon>
+                    </md-button>
+                  </td>
+                  <td class="mdl-data-table__cell--non-numeric">
+                    <md-button class="mdl-button mdl-js-button" ng-click="open(location)">
+                      <md-icon class="material-icons">explore</md-icon>
                     </md-button>
                   </td>
                 </tr>

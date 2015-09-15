@@ -39,7 +39,7 @@ angular.module('totemDashboard')
   };
 })
 
-.controller('ApplicationsSelectedContoller', ['$document', '$scope', '$stateParams', '$websocket', '$mdToast', '$mdDialog', '$window', '$location', 'api', 'logs', function($document, $scope, $stateParams, $websocket, $mdToast, $mdDialog, $window, $location, api, logService) {
+.controller('ApplicationsSelectedContoller', ['$document', '$scope', '$stateParams', '$websocket', '$mdToast', '$mdDialog', '$mdSidenav', '$window', '$location', 'api', 'logs', function($document, $scope, $stateParams, $websocket, $mdToast, $mdDialog, $mdSidenav, $window, $location, api, logService) {
   $scope.application = null;
   $scope.events = [];
   $scope.ganttData = [];
@@ -295,6 +295,56 @@ angular.module('totemDashboard')
     $mdDialog.show(confirm).catch(function () {
       deleteDeployment(deployment);
     });
+  };
+
+  $scope.toggleSidenav = function () {
+    $mdSidenav('left').toggle();
+  };
+
+  $scope.getTiming = function (deployment) {
+    if (!deployment) {
+      return;
+    }
+
+    var stateUpdated;
+
+    if (deployment.stateUpdated) {
+      stateUpdated = deployment.stateUpdated;
+    } else if (deployment['state-updated']) {
+      stateUpdated = moment(deployment['state-updated']);
+    } else {
+      stateUpdated = moment(deployment.modified);
+    }
+
+    var diff = stateUpdated.fromNow(),
+        message;
+
+    switch (deployment.state) {
+      case 'PROMOTED':
+        diff = moment.duration(moment().diff(stateUpdated)).humanize();
+        message = 'up ' + diff;
+        break;
+      case 'DECOMMISSIONED':
+        message = 'stopped ' + diff;
+        break;
+      case 'FAILED':
+        message = 'failed ' + diff;
+        break;
+      case 'STARTED':
+        message = 'started ' + diff;
+    }
+
+    return message;
+  };
+
+  $scope.getCommitLink = function (deployment) {
+    try {
+      var gitInfo = deployment.metaInfo.git;
+
+      if (gitInfo.type === 'github') {
+        return 'https://github.com/' + gitInfo.owner + '/' + gitInfo.repo + '/commit/' + gitInfo.commit;
+      }
+    } catch (err) {}
   };
 
   $scope.open = function (location) {
