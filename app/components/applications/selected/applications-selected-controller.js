@@ -39,7 +39,7 @@ angular.module('totemDashboard')
   };
 })
 
-.controller('ApplicationsSelectedContoller', ['$document', '$scope', '$stateParams', '$websocket', '$mdToast', '$mdDialog', '$mdSidenav', '$window', '$location', '$interval', 'api', 'logs', function($document, $scope, $stateParams, $websocket, $mdToast, $mdDialog, $mdSidenav, $window, $location, $interval, api, logService) {
+.controller('ApplicationsSelectedContoller', ['$document', '$scope', '$stateParams', '$websocket', '$mdToast', '$mdDialog', '$mdSidenav', '$window', '$location', '$timeout', '$interval', 'api', 'logs', function($document, $scope, $stateParams, $websocket, $mdToast, $mdDialog, $mdSidenav, $window, $location, $timeout, $interval, api, logService) {
   $scope.application = null;
   $scope.events = [];
   $scope.ganttData = [];
@@ -282,6 +282,16 @@ angular.module('totemDashboard')
 
     $scope.websocket.onClose(function() {
       $scope.logs.running = false;
+    });
+  };
+
+  $scope.restoreDeployment = function (deployment) {
+    $scope.working = true;
+    api.restoreDeployment(deployment.deployment.name, deployment.deployment.version, deployment.state, deployment.metaInfo.deployer.url).then(function () {
+      $timeout(function () {
+        $scope.load();
+        $scope.working = false;
+      }, 10000);
     });
   };
 
