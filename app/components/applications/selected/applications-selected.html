@@ -24,7 +24,7 @@
         <md-tooltip>Decomission deployment</md-tooltip>
         <md-icon class="material-icons">delete</md-icon>
       </md-button>
-      <md-button class="md-primary md-fab" ng-disabled="['DECOMMISSIONED', 'FAILED'].indexOf(selected.deployment.state) === -1" ng-click="restoreDeployment(selected.deployment)">
+      <md-button class="md-warn md-fab" ng-disabled="['DECOMMISSIONED', 'FAILED'].indexOf(selected.deployment.state) === -1" ng-click="restoreDeployment(selected.deployment)">
         <md-tooltip>Restore deployment</md-tooltip>
         <md-icon class="material-icons">restore</md-icon>
       </md-button>
