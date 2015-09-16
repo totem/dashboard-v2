@@ -291,15 +291,19 @@ angular.module('totemDashboard')
       return $http.delete(deployerUrl + '/apps/' + appName);
     };
 
-    this.cloneDeployment = function (appName, version, deployerUrl) {
-      var deferred = $q.defer();
-
-      window.setTimeout(function () {
-        deferred.resolve();
-      }, 5000);
-
-      return deferred.promise;
-      // return $http.patch(deployerUrl + '/apps/' + appName + '/versions/' + version, {state: 'NEW'});
+    this.cloneDeployment = function (appName, version, state, deployerUrl) {
+      return $http({
+        method: 'POST',
+        url: deployerUrl + '/recovery',
+        headers: {
+          'Content-Type': 'application/vnd.deployer.recovery.v1+json'
+        },
+        data: {
+          name: appName,
+          version: version,
+          state: state
+        }
+      });
     };
 
     this.getJobEvents = function(jobId) {
