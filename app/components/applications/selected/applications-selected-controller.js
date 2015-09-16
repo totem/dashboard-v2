@@ -39,7 +39,7 @@ angular.module('totemDashboard')
   };
 })
 
-.controller('ApplicationsSelectedContoller', ['$document', '$scope', '$stateParams', '$websocket', '$mdToast', '$window', '$location', 'api', 'logs', function($document, $scope, $stateParams, $websocket, $mdToast, $window, $location, api, logService) {
+.controller('ApplicationsSelectedContoller', ['$document', '$scope', '$stateParams', '$websocket', '$mdToast', '$window', '$location', '$timeout', 'api', 'logs', function($document, $scope, $stateParams, $websocket, $mdToast, $window, $location, $timeout, api, logService) {
   $scope.application = null;
   $scope.events = [];
   $scope.ganttData = [];
@@ -278,9 +278,11 @@ angular.module('totemDashboard')
 
   $scope.cloneDeployment = function (deployment) {
     $scope.working = true;
-    api.cloneDeployment(deployment.deployment.name, deployment.deployment.version, deployment.state, deployment.metaInfo.deployer.url).then(function (data) {
-      console.log(data);
-      $scope.working = false;
+    api.cloneDeployment(deployment.deployment.name, deployment.deployment.version, deployment.state, deployment.metaInfo.deployer.url).then(function () {
+      $timeout(function () {
+        $scope.load();
+        $scope.working = false;
+      }, 10000);
     });
   };
 

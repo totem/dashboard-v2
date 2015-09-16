@@ -292,17 +292,10 @@ angular.module('totemDashboard')
     };
 
     this.cloneDeployment = function (appName, version, state, deployerUrl) {
-      return $http({
-        method: 'POST',
-        url: deployerUrl + '/recovery',
-        headers: {
-          'Content-Type': 'application/vnd.deployer.recovery.v1+json'
-        },
-        data: {
-          name: appName,
-          version: version,
-          state: state
-        }
+      return $http.post(deployerUrl + '/recovery', {
+        name: appName,
+        version: version,
+        state: state
       });
     };
 
