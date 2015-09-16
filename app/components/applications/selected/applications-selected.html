@@ -17,13 +17,22 @@
         <md-tooltip>Open deployment menu</md-tooltip>
         <md-icon class="material-icons">menu</md-icon>
       </md-button>
-      <md-button class="md-raised md-warn md-fab" ng-click="deleteDialog($event, selected.deployment)" ng-disabled="selected.deployment.state !== 'PROMOTED'">
+      <md-button class="md-primary md-fab" ng-click="refresh()">
+        <md-tooltip>Update view</md-tooltip>
+        <md-icon class="material-icons">refresh</md-icon>
+      </md-button>
+      <md-button class="md-warn md-fab" ng-click="deleteDialog($event, selected.deployment)" ng-disabled="selected.deployment.state !== 'PROMOTED'">
         <md-tooltip>Decomission deployment</md-tooltip>
         <md-icon class="material-icons">delete</md-icon>
       </md-button>
-      <md-button class="md-raised md-primary md-fab" ng-click="">
-        <md-tooltip>Clone deployment</md-tooltip>
-        <md-icon class="material-icons">refresh</md-icon>
+      <md-button class="md-primary md-fab">
+        <md-tooltip>Restore deployment</md-tooltip>
+        <md-icon class="material-icons">restore</md-icon>
+      </md-button>
+      <md-button class="md-fab md-primary" ng-click="logs.scroll = !logs.scroll" ng-disabled="!logs.viewing">
+        <md-tooltip>Follow logs</md-tooltip>
+        <md-icon ng-if="logs.scroll" class="material-icons">visibility</md-icon>
+        <md-icon ng-if="!logs.scroll" class="material-icons">visibility_off</md-icon>
       </md-button>
     </md-fab-actions>
   </md-fab-speed-dial>
@@ -48,14 +57,6 @@
     <h3>Decommissioning has started for this deployment</h3>
   </div>
 </md-toolbar>
-
-<div class="follow-logs"  ng-if="logs.viewing">
-  <md-switch ng-model="logs.scroll" aria-label="Follow Logs">
-    <md-tooltip md-direction="up">
-      Follow Logs
-    </md-tooltip>
-  </md-switch>
-</div>
 
 <div layout="row" ng-if="loaded">
   <md-sidenav class="md-sidenav-left md-whiteframe-z2" md-component-id="left">

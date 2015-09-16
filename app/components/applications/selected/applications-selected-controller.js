@@ -39,7 +39,7 @@ angular.module('totemDashboard')
   };
 })
 
-.controller('ApplicationsSelectedContoller', ['$document', '$scope', '$stateParams', '$websocket', '$mdToast', '$mdDialog', '$mdSidenav', '$window', '$location', 'api', 'logs', function($document, $scope, $stateParams, $websocket, $mdToast, $mdDialog, $mdSidenav, $window, $location, api, logService) {
+.controller('ApplicationsSelectedContoller', ['$document', '$scope', '$stateParams', '$websocket', '$mdToast', '$mdDialog', '$mdSidenav', '$window', '$location', '$interval', 'api', 'logs', function($document, $scope, $stateParams, $websocket, $mdToast, $mdDialog, $mdSidenav, $window, $location, $interval, api, logService) {
   $scope.application = null;
   $scope.events = [];
   $scope.ganttData = [];
@@ -216,6 +216,14 @@ angular.module('totemDashboard')
       $scope.events = results;
       $scope.loaded = true;
     });
+
+    if (deployment.state === 'NEW' || deployment.state === 'STARTED') {
+      $scope.updateInterval = $interval(function () {
+        $scope.refresh();
+      }, 30000);
+    } else if ($scope.updateInterval) {
+      $scope.updateInterval.cancel();
+    }
   });
 
   $scope.isPublicACL = function(location) {
@@ -356,13 +364,21 @@ angular.module('totemDashboard')
     $window.open('http://' + location.hostname + location.path);
   };
 
-  $scope.load = function() {
+  $scope.refresh = function () {
+    $scope.load($scope.selected.deployment);
+  };
+
+  $scope.load = function (deployment) {
     api.getApplication($stateParams.owner, $stateParams.repo, $stateParams.ref).then(function(results) {
       $scope.application = results;
       $scope.application.ref = results.refs[$stateParams.ref];
 
       try {
-        $scope.selected.deployment = results.ref.deployments[0];
+        if (deployment) {
+          $scope.selected.deployment = _.findWhere(results.ref.deployments, {id: deployment.id});
+        } else {
+          $scope.selected.deployment = results.ref.deployments[0];
+        }
       } catch (err) {}
     }, function(error) {
       $mdToast.show($mdToast.simple().position('top left').content('Error Getting Application!'));
