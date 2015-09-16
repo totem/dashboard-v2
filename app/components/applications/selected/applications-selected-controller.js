@@ -39,7 +39,7 @@ angular.module('totemDashboard')
   };
 })
 
-.controller('ApplicationsSelectedContoller', ['$document', '$scope', '$stateParams', '$websocket', '$mdToast', '$window', '$location', '$timeout', 'api', 'logs', function($document, $scope, $stateParams, $websocket, $mdToast, $window, $location, $timeout, api, logService) {
+.controller('ApplicationsSelectedContoller', ['$document', '$scope', '$stateParams', '$websocket', '$mdToast', '$mdDialog', '$window', '$location', '$timeout', 'api', 'logs', function($document, $scope, $stateParams, $websocket, $mdToast, $mdDialog, $window, $location, $timeout, api, logService) {
   $scope.application = null;
   $scope.events = [];
   $scope.ganttData = [];
@@ -214,6 +214,7 @@ angular.module('totemDashboard')
     api.getJobEvents(deployment.metaInfo.jobId).then(function(results) {
       updateEvents(results.events, deployment.metaInfo.deployer.name);
       $scope.events = results;
+      $scope.loaded = true;
     });
   });
 
@@ -286,11 +287,24 @@ angular.module('totemDashboard')
     });
   };
 
-  $scope.deleteDeployment = function (deployment) {
+  function deleteDeployment (deployment) {
     $scope.working = true;
     api.deleteDeployment(deployment.deployment.name, deployment.metaInfo.deployer.url).then(function () {
       $scope.working = false;
       $scope.selected.deployment.decomissionStarted = true;
+    });
+  }
+
+  $scope.deleteDialog = function (event, deployment) {
+    var confirm = $mdDialog.confirm()
+          .title('Confirm decommission')
+          .content('Are you sure you want to decommission this deployment?')
+          .ok('No') // Swapping here to make "no" the default
+          .cancel('Yes')
+          .targetEvent(event);
+
+    $mdDialog.show(confirm).catch(function () {
+      deleteDeployment(deployment);
     });
   };
 
@@ -306,8 +320,6 @@ angular.module('totemDashboard')
       try {
         $scope.selected.deployment = results.ref.deployments[0];
       } catch (err) {}
-
-      $scope.loaded = true;
     }, function(error) {
       $mdToast.show($mdToast.simple().position('top left').content('Error Getting Application!'));
       console.error(error);
