@@ -295,7 +295,7 @@ angular.module('totemDashboard')
       return $http.delete(deployerUrl + '/apps/' + appName);
     };
 
-    this.cloneDeployment = function (appName, version, state, deployerUrl) {
+    this.restoreDeployment = function (appName, version, state, deployerUrl) {
       return $http.post(deployerUrl + '/recovery', {
         name: appName,
         version: version,

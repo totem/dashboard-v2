@@ -277,9 +277,9 @@ angular.module('totemDashboard')
     });
   };
 
-  $scope.cloneDeployment = function (deployment) {
+  $scope.restoreDeployment = function (deployment) {
     $scope.working = true;
-    api.cloneDeployment(deployment.deployment.name, deployment.deployment.version, deployment.state, deployment.metaInfo.deployer.url).then(function () {
+    api.restoreDeployment(deployment.deployment.name, deployment.deployment.version, deployment.state, deployment.metaInfo.deployer.url).then(function () {
       $timeout(function () {
         $scope.load();
         $scope.working = false;
