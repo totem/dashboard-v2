@@ -2,8 +2,8 @@
   <div class="md-toolbar-tools">
     <h2>{{ application.owner }}/{{ application.repo }}</h2>
     <span flex></span>
-    <md-button class="md-raised md-primary" ng-click="">
-      Clone
+    <md-button class="md-raised md-primary" ng-disabled="['DECOMMISSIONED', 'FAILED'].indexOf(selected.deployment.state) === -1" ng-click="restoreDeployment(selected.deployment)">
+      Restore
     </md-button>
     <md-button class="md-raised md-warn" ng-click="deleteDialog($event, selected.deployment)" ng-disabled="selected.deployment.state !== 'PROMOTED'">
       <md-tooltip>Decomission deployment</md-tooltip>
