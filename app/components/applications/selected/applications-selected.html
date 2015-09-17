@@ -11,6 +11,7 @@
         <md-icon class="material-icons">more_horiz</md-icon>
       </md-button>
     </md-fab-trigger>
+
     <md-fab-actions>
       <md-button class="md-fab md-primary" ng-click="toggleSidenav()">
         <md-tooltip>Open deployment menu</md-tooltip>
@@ -28,13 +29,14 @@
         <md-tooltip>Restore deployment</md-tooltip>
         <md-icon class="material-icons">restore</md-icon>
       </md-button>
-      <md-button class="md-fab md-primary" ng-click="logs.scroll = !logs.scroll" ng-disabled="!logs.viewing">
-        <md-tooltip>Follow logs</md-tooltip>
-        <md-icon ng-if="logs.scroll" class="material-icons">visibility</md-icon>
-        <md-icon ng-if="!logs.scroll" class="material-icons">visibility_off</md-icon>
-      </md-button>
     </md-fab-actions>
   </md-fab-speed-dial>
+
+  <md-button class="follow-logs-button md-fab md-primary" ng-click="logs.scroll = !logs.scroll" ng-if="logs.viewing">
+    <md-tooltip md-direction="top">Follow logs</md-tooltip>
+    <md-icon ng-if="logs.scroll" class="material-icons">visibility</md-icon>
+    <md-icon ng-if="!logs.scroll" class="material-icons">visibility_off</md-icon>
+  </md-button>
 </md-toolbar>
 
 <md-toolbar class="md-accent" ng-if="working || !loaded">
