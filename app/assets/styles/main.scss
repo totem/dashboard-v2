@@ -1,3 +1,7 @@
+[href] {
+  cursor: pointer;
+}
+
 .browsehappy {
   margin: 0.2em 0;
   background: #ccc;
@@ -128,6 +132,14 @@ md-fab-speed-dial {
   position: fixed;
   bottom: 40px;
   right: 40px;
+
+  &.md-is-open .md-fab-action-item {
+    transform: translateX(0) !important;
+  }
+}
+
+md-backdrop.md-opaque.ng-enter {
+  opacity: .48;
 }
 
 .follow-logs-button {
