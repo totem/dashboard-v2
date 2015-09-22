@@ -3,7 +3,6 @@
     <h1><strong>{{ application.owner }} / {{ application.repo }} / {{ application.ref.name }}</strong></h1>
     <small>&nbsp;(<a ng-href="{{ getCommitLink(selected.deployment) }}" target="_blank"><code>{{ selected.deployment.metaInfo.git.commit.substr(0, 5) }}</code></a>)</small>
     <span flex></span>
-    <h2>{{ getTiming(selected.deployment) }}</h2>
   </div>
 
   <md-fab-speed-dial md-direction="left" class="md-fling" md-open="fabIsOpen" ng-mouseenter="fabIsOpen = true" ng-mouseleave="fabIsOpen = false">

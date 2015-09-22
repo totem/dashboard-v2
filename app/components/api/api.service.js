@@ -19,7 +19,7 @@ angular.module('totemDashboard')
 
       return (cache[host] = esFactory({
         host: host,
-        apiVersion: '1.6',
+        apiVersion: '1.5',
         log: logLevel
       }));
     };
