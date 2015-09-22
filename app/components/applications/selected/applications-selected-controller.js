@@ -344,7 +344,7 @@ angular.module('totemDashboard')
         message = 'up for ' + diff;
         break;
       case 'DECOMMISSIONED':
-        message = 'stopped ' + diff;
+        message = 'deleted ' + diff;
         break;
       case 'FAILED':
         message = 'failed ' + diff;
