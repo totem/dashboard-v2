@@ -39,7 +39,7 @@ angular.module('totemDashboard')
   };
 })
 
-.controller('ApplicationsSelectedContoller', ['$document', '$scope', '$stateParams', '$websocket', '$mdToast', '$mdDialog', '$window', '$location', '$timeout', 'api', 'logs', function($document, $scope, $stateParams, $websocket, $mdToast, $mdDialog, $window, $location, $timeout, api, logService) {
+.controller('ApplicationsSelectedContoller', ['$document', '$scope', '$stateParams', '$websocket', '$mdToast', '$mdDialog', '$mdSidenav', '$window', '$location', '$timeout', '$interval', 'api', 'logs', function($document, $scope, $stateParams, $websocket, $mdToast, $mdDialog, $mdSidenav, $window, $location, $timeout, $interval, api, logService) {
   $scope.application = null;
   $scope.events = [];
   $scope.ganttData = [];
@@ -216,6 +216,14 @@ angular.module('totemDashboard')
       $scope.events = results;
       $scope.loaded = true;
     });
+
+    if (deployment.state === 'NEW' || deployment.state === 'STARTED') {
+      $scope.updateInterval = $interval(function () {
+        $scope.refresh();
+      }, 30000);
+    } else if ($scope.updateInterval) {
+      $scope.updateInterval.cancel();
+    }
   });
 
   $scope.isPublicACL = function(location) {
@@ -308,17 +316,79 @@ angular.module('totemDashboard')
     });
   };
 
+  $scope.toggleSidenav = function () {
+    $mdSidenav('left').toggle();
+  };
+
+  $scope.getTiming = function (deployment) {
+    if (!deployment) {
+      return;
+    }
+
+    var stateUpdated;
+
+    if (deployment.stateUpdated) {
+      stateUpdated = deployment.stateUpdated;
+    } else if (deployment['state-updated']) {
+      stateUpdated = moment(deployment['state-updated']);
+    } else {
+      stateUpdated = moment(deployment.modified);
+    }
+
+    var diff = stateUpdated.fromNow(),
+        message;
+
+    switch (deployment.state) {
+      case 'PROMOTED':
+        diff = moment.duration(moment().diff(stateUpdated)).humanize();
+        message = 'up for ' + diff;
+        break;
+      case 'DECOMMISSIONED':
+        message = 'deleted ' + diff;
+        break;
+      case 'FAILED':
+        message = 'failed ' + diff;
+        break;
+      case 'STARTED':
+        message = 'started ' + diff;
+        break;
+      case 'NEW':
+        message = 'created ' + diff;
+        break;
+    }
+
+    return message;
+  };
+
+  $scope.getCommitLink = function (deployment) {
+    try {
+      var gitInfo = deployment.metaInfo.git;
+
+      if (gitInfo.type === 'github') {
+        return 'https://github.com/' + gitInfo.owner + '/' + gitInfo.repo + '/commit/' + gitInfo.commit;
+      }
+    } catch (err) {}
+  };
+
   $scope.open = function (location) {
     $window.open('http://' + location.hostname + location.path);
   };
 
-  $scope.load = function() {
+  $scope.refresh = function () {
+    $scope.load($scope.selected.deployment);
+  };
+
+  $scope.load = function (deployment) {
     api.getApplication($stateParams.owner, $stateParams.repo, $stateParams.ref).then(function(results) {
       $scope.application = results;
       $scope.application.ref = results.refs[$stateParams.ref];
 
       try {
-        $scope.selected.deployment = results.ref.deployments[0];
+        if (deployment) {
+          $scope.selected.deployment = _.findWhere(results.ref.deployments, {id: deployment.id});
+        } else {
+          $scope.selected.deployment = results.ref.deployments[0];
+        }
       } catch (err) {}
     }, function(error) {
       $mdToast.show($mdToast.simple().position('top left').content('Error Getting Application!'));

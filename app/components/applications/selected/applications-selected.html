@@ -1,15 +1,43 @@
 <md-toolbar class="md-primary md-hue-1">
   <div class="md-toolbar-tools">
-    <h2>{{ application.owner }}/{{ application.repo }}</h2>
+    <h1><strong>{{ application.owner }} / {{ application.repo }} / {{ application.ref.name }}</strong></h1>
+    <small>&nbsp;(<a ng-href="{{ getCommitLink(selected.deployment) }}" target="_blank"><code>{{ selected.deployment.metaInfo.git.commit.substr(0, 5) }}</code></a>)</small>
     <span flex></span>
-    <md-button class="md-raised md-primary" ng-disabled="['DECOMMISSIONED', 'FAILED'].indexOf(selected.deployment.state) === -1" ng-click="restoreDeployment(selected.deployment)">
-      Restore
-    </md-button>
-    <md-button class="md-raised md-warn" ng-click="deleteDialog($event, selected.deployment)" ng-disabled="selected.deployment.state !== 'PROMOTED'">
-      <md-tooltip>Decomission deployment</md-tooltip>
-      <md-icon class="material-icons">delete</md-icon>
-    </md-button>
+    <h2>{{ getTiming(selected.deployment) }}</h2>
   </div>
+
+  <md-fab-speed-dial md-direction="left" class="md-fling" md-open="fabIsOpen" ng-mouseenter="fabIsOpen = true" ng-mouseleave="fabIsOpen = false">
+    <md-fab-trigger>
+      <md-button class="md-fab">
+        <md-icon class="material-icons">more_horiz</md-icon>
+      </md-button>
+    </md-fab-trigger>
+
+    <md-fab-actions>
+      <md-button class="md-fab md-primary" ng-click="toggleSidenav()">
+        <md-tooltip>Open deployment menu</md-tooltip>
+        <md-icon class="material-icons">menu</md-icon>
+      </md-button>
+      <md-button class="md-primary md-fab" ng-click="refresh()">
+        <md-tooltip>Update view</md-tooltip>
+        <md-icon class="material-icons">refresh</md-icon>
+      </md-button>
+      <md-button class="md-warn md-fab" ng-click="deleteDialog($event, selected.deployment)" ng-disabled="selected.deployment.state !== 'PROMOTED'">
+        <md-tooltip>Decomission deployment</md-tooltip>
+        <md-icon class="material-icons">delete</md-icon>
+      </md-button>
+      <md-button class="md-warn md-fab" ng-disabled="['DECOMMISSIONED', 'FAILED'].indexOf(selected.deployment.state) === -1" ng-click="restoreDeployment(selected.deployment)">
+        <md-tooltip>Restore deployment</md-tooltip>
+        <md-icon class="material-icons">restore</md-icon>
+      </md-button>
+    </md-fab-actions>
+  </md-fab-speed-dial>
+
+  <md-button class="follow-logs-button md-fab md-primary" ng-click="logs.scroll = !logs.scroll" ng-if="logs.viewing">
+    <md-tooltip md-direction="top">Follow logs</md-tooltip>
+    <md-icon ng-if="logs.scroll" class="material-icons">visibility</md-icon>
+    <md-icon ng-if="!logs.scroll" class="material-icons">visibility_off</md-icon>
+  </md-button>
 </md-toolbar>
 
 <md-toolbar class="md-accent" ng-if="working || !loaded">
@@ -32,142 +60,155 @@
   </div>
 </md-toolbar>
 
-<div class="follow-logs"  ng-if="logs.viewing">
-  <md-switch ng-model="logs.scroll" aria-label="Follow Logs">
-    <md-tooltip md-direction="up">
-      Follow Logs
-    </md-tooltip>
-  </md-switch>
-</div>
+<div layout="row" ng-if="loaded">
+  <md-sidenav class="md-sidenav-left md-whiteframe-z2" md-component-id="left">
+    <md-toolbar class="md-primary md-hue-2">
+      <div class="md-toolbar-tools">
+        <h3>Select deployment</h3>
+      </div>
+    </md-toolbar>
 
-<div layout="column" flex="" layout-fill="" ng-if="loaded">
-  <md-tabs md-dynamic-height md-border-bottom>
-    <md-tab label="Summary">
-      <md-content layout-padding>
-        <div layout="row" layout-sm="column">
-          <h3>{{ application.ref.name }} ({{ selected.deployment.state | lowercase }} {{ selected.deployment.stateUpdated.fromNow() }})</h3>
-          <md-select ng-model="selected.deployment" style="margin-left: 20px;" placeholder="Change Deployment" style="min-width: 200px;">
-            <md-option ng-value="deploy" ng-repeat="deploy in application.ref.deployments">{{deploy.id}} {{ deploy.state | lowercase }} {{ deploy.stateUpdated.fromNow() }}</md-option>
-          </md-select>
-        </div>
+    <md-content class="md-padding">
+      <md-radio-group ng-model="selected.deployment" class="md-primary">
+        <md-radio-button ng-repeat="deploy in application.ref.deployments" ng-value="deploy" ng-click="toggleSidenav()">
+          {{ getTiming(deploy) }}<br />
 
-        <div layout="row" layout-sm="column">
-          <table class="mdl-data-table mdl-js-data-table" width="100%">
-            <thead>
-              <tr>
-                <th class="mdl-data-table__cell--non-numeric">Host</th>
-                <th class="mdl-data-table__cell--non-numeric">Path</th>
-                <th class="mdl-data-table__cell--non-numeric">Port</th>
-                <th class="mdl-data-table__cell--non-numeric">Privacy</th>
-              </tr>
-            </thead>
-            <tbody ng-repeat="item in selected.deployment.proxyMeta">
-              <tr ng-repeat="location in item.locations" ng-click="open(location)">
-                <td class="mdl-data-table__cell--non-numeric">{{ location.hostname }}</td>
-                <td class="mdl-data-table__cell--non-numeric">{{ location.path }}</td>
-                <td class="mdl-data-table__cell--non-numeric">{{ location.port }}</td>
-                <td class="mdl-data-table__cell--non-numeric">
-                  <md-button class="mdl-button mdl-js-button">
-                    <md-tooltip>
-                      {{ location['allowed-acls'].join(', ') }}
-                    </md-tooltip>
-                    <md-icon ng-if="isPublicACL(location)" class="material-icons">lock_open</md-icon>
-                    <md-icon ng-if="!isPublicACL(location)" class="material-icons">lock</md-icon>
-                  </md-button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+          <small><code>{{ deploy.metaInfo.git.commit.substr(0, 5) }}</code></small>
+        </md-radio-button>
+      </md-radio-group>
+    </md-content>
+  </md-sidenav>
 
-        <div layout="row" layout-sm="column" ng-if="events.events">
-          <div flex>
-            <h3>Events</h3>
+  <div layout="column" layout-fill>
+    <md-tabs md-align-tabs="bottom">
+      <md-tab label="Summary">
+        <md-content class="md-padding">
+          <div layout="row" layout-sm="column">
+            <table class="mdl-data-table mdl-js-data-table" width="100%">
+              <thead>
+                <tr>
+                  <th class="mdl-data-table__cell--non-numeric">Host</th>
+                  <th class="mdl-data-table__cell--non-numeric">Path</th>
+                  <th class="mdl-data-table__cell--non-numeric">Port</th>
+                  <th class="mdl-data-table__cell--non-numeric">Privacy</th>
+                  <th class="mdl-data-table__cell--non-numeric">Go</th>
+                </tr>
+              </thead>
+              <tbody ng-repeat="item in selected.deployment.proxyMeta">
+                <tr ng-repeat="location in item.locations">
+                  <td class="mdl-data-table__cell--non-numeric">{{ location.hostname }}</td>
+                  <td class="mdl-data-table__cell--non-numeric">{{ location.path }}</td>
+                  <td class="mdl-data-table__cell--non-numeric">{{ location.port }}</td>
+                  <td class="mdl-data-table__cell--non-numeric">
+                    <md-button class="mdl-button mdl-js-button">
+                      <md-tooltip>
+                        {{ location['allowed-acls'].join(', ') }}
+                      </md-tooltip>
+                      <md-icon ng-if="isPublicACL(location)" class="material-icons">lock_open</md-icon>
+                      <md-icon ng-if="!isPublicACL(location)" class="material-icons">lock</md-icon>
+                    </md-button>
+                  </td>
+                  <td class="mdl-data-table__cell--non-numeric">
+                    <md-button class="mdl-button mdl-js-button" ng-click="open(location)">
+                      <md-icon class="material-icons">explore</md-icon>
+                    </md-button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
 
-            <div gantt data="ganttData" from-date="ganttTimespan.from" to-date="ganttTimespan.to" headers="['day', 'minute']" headers-formats="{day: 'D MMMM YYYY', minute: 'h:mma'}" view-scale="ganttScale">
-              <gantt-tree enabled header-content="'Event'"></gantt-tree>
+          <div layout="row" layout-sm="column" ng-if="events.events">
+            <div flex>
+              <h3>Events</h3>
+
+              <div gantt data="ganttData" from-date="ganttTimespan.from" to-date="ganttTimespan.to" headers="['day', 'minute']" headers-formats="{day: 'D MMMM YYYY', minute: 'h:mma'}" view-scale="ganttScale">
+                <gantt-tree enabled header-content="'Event'"></gantt-tree>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div layout="row" layout-sm="column">
-          <div flex ng-repeat="node in selected.deployment.nodes">
-            <h4>Node {{ $index + 1 }}</h4>
+          <div layout="row" layout-sm="column">
+            <div flex ng-repeat="node in selected.deployment.nodes">
+              <h4>Node {{ $index + 1 }}</h4>
 
-            <p>
-              <strong>Machine ID:</strong> {{ node.id }}<br />
-              <strong>Machine Address:</strong> {{ node.address }}
-            </p>
+              <p>
+                <strong>Machine ID:</strong> {{ node.id }}<br />
+                <strong>Machine Address:</strong> {{ node.address }}
+              </p>
 
-            <h5>Units</h5>
+              <h5>Units</h5>
 
-            <p ng-repeat="unit in node.units">
-              <strong>Unit:</strong> {{ unit.unit }}<br />
-              <strong>Active:</strong> {{ unit.active }}<br />
-              <strong>Status:</strong> {{ unit.sub }}<br />
-              <strong>Ports:</strong><span ng-repeat="(port, upstream) in unit.upstreams"> <a ng-href="http://{{ upstream.endpoint }}" target="_blank">{{ port }}</a></span>
-            </p>
+              <p ng-repeat="unit in node.units">
+                <strong>Unit:</strong> {{ unit.unit }}<br />
+                <strong>Active:</strong> {{ unit.active }}<br />
+                <strong>Status:</strong> {{ unit.sub }}<br />
+                <strong>Ports:</strong><span ng-repeat="(port, upstream) in unit.upstreams"> <a ng-href="http://{{ upstream.endpoint }}" target="_blank">{{ port }}</a></span>
+              </p>
+            </div>
           </div>
-        </div>
-      </md-content>
-    </md-tab>
-    <md-tab label="Logs" md-on-select="logs.viewing = true" md-on-deselect="logs.viewing = false">
-      <md-content class="md-padding">
-        <md-subheader>
-          <md-button class="md-raised" ng-class="{'md-primary': !logs.running}" ng-disabled="logs.running" ng-click="startLogs()">
-            <md-icon class="material-icons">play_arrow</md-icon>
-          </md-button>
-          <md-button class="md-raised" ng-class="{'md-warn': logs.running}" ng-disabled="!logs.running" ng-click="stopLogs()">
-            <md-icon class="material-icons">stop</md-icon>
-          </md-button>
-          <md-button class="md-raised" ng-disabled="!logs.messages.length" ng-click="logs.messages.length = 0">
-            <md-icon class="material-icons">delete</md-icon>
-          </md-button>
-          <md-button class="md-raised" ng-click="logs.showTimestamp = !logs.showTimestamp" ng-class="{'md-primary': logs.showTimestamp}">
-            Show Timestamps
-          </md-button>
-          {{logs.status.description}}
-        </md-subheader>
-        <div layout layout-sm="column" class="log-controls">
-          <md-input-container md-no-float flex>
-            <md-icon class="material-icons datetime">access_time</md-icon>
-            <input humandate ng-model="logs.date" type="text" placeholder="How long to look back, empty is now, -30 mins is valid">
-          </md-input-container>
-          <md-input-container md-no-float flex>
-            <md-icon class="material-icons">search</md-icon>
-            <input ng-model="logs.filter.$" type="text" placeholder="Filter">
-          </md-input-container>
-        </div>
-        <div class="log-messages" id="log-messages">
-          <div ng-repeat="line in logs.messages | filter:logs.filter:strict"><span ng-if="logs.showTimestamp" class="timestamp">{{ line.date.format('MMM Do h:mm:ss a') }}</span> {{ line.message }}</div>
-        </div>
-      </md-content>
-    </md-tab>
-    <md-tab label="Diagnostics">
-      <md-content class="md-padding">
-        <div layout="row" layout-sm="column">
-          <div flex>
-            <p>Selected Deployment</p>
-            <json-formatter json="selected.deployment" open="1"></json-formatter>
+        </md-content>
+      </md-tab>
+
+      <md-tab label="Logs" md-on-select="logs.viewing = true" md-on-deselect="logs.viewing = false">
+        <md-content class="md-padding">
+          <md-subheader>
+            <md-button class="md-raised" ng-class="{'md-primary': !logs.running}" ng-disabled="logs.running" ng-click="startLogs()">
+              <md-icon class="material-icons">play_arrow</md-icon>
+            </md-button>
+            <md-button class="md-raised" ng-class="{'md-warn': logs.running}" ng-disabled="!logs.running" ng-click="stopLogs()">
+              <md-icon class="material-icons">stop</md-icon>
+            </md-button>
+            <md-button class="md-raised" ng-disabled="!logs.messages.length" ng-click="logs.messages.length = 0">
+              <md-icon class="material-icons">delete</md-icon>
+            </md-button>
+            <md-button class="md-raised" ng-click="logs.showTimestamp = !logs.showTimestamp" ng-class="{'md-primary': logs.showTimestamp}">
+              Show Timestamps
+            </md-button>
+            {{logs.status.description}}
+          </md-subheader>
+          <div layout layout-sm="column" class="log-controls">
+            <md-input-container md-no-float flex>
+              <md-icon class="material-icons datetime">access_time</md-icon>
+              <input humandate ng-model="logs.date" type="text" placeholder="How long to look back, empty is now, -30 mins is valid">
+            </md-input-container>
+            <md-input-container md-no-float flex>
+              <md-icon class="material-icons">search</md-icon>
+              <input ng-model="logs.filter.$" type="text" placeholder="Filter">
+            </md-input-container>
           </div>
-          <div flex>
-            <p>Application</p>
-            <json-formatter json="application" open="1"></json-formatter>
+          <div class="log-messages" id="log-messages">
+            <div ng-repeat="line in logs.messages | filter:logs.filter:strict"><span ng-if="logs.showTimestamp" class="timestamp">{{ line.date.format('MMM Do h:mm:ss a') }}</span> {{ line.message }}</div>
           </div>
-          <div flex>
-            <md-list>
-              <md-subheader class="md-no-sticky">Events</md-subheader>
-              <md-list-item class="md-3-line" ng-repeat="event in events.events">
-                <div class="md-list-item-text">
-                  <h3>{{ event.type | lowercase }}</h3>
-                  <h4>{{ event.component }}</h4>
-                  <p>{{ event.date }} <json-formatter json="event"></json-formatter></p>
-                </div>
-              </md-list-item>
-            </md-list>
+        </md-content>
+      </md-tab>
+
+      <md-tab label="Diagnostics">
+        <md-content class="md-padding">
+          <div layout="row" layout-sm="column">
+            <div flex>
+              <p>Selected Deployment</p>
+              <json-formatter json="selected.deployment" open="1"></json-formatter>
+            </div>
+            <div flex>
+              <p>Application</p>
+              <json-formatter json="application" open="1"></json-formatter>
+            </div>
+            <div flex>
+              <md-list>
+                <md-subheader class="md-no-sticky">Events</md-subheader>
+                <md-list-item class="md-3-line" ng-repeat="event in events.events">
+                  <div class="md-list-item-text">
+                    <h3>{{ event.type | lowercase }}</h3>
+                    <h4>{{ event.component }}</h4>
+                    <p>{{ event.date }} <json-formatter json="event"></json-formatter></p>
+                  </div>
+                </md-list-item>
+              </md-list>
+            </div>
           </div>
-        </div>
-      </md-content>
-    </md-tab>
-  </md-tabs>
+        </md-content>
+      </md-tab>
+    </md-tabs>
+  </div>
 </div>
