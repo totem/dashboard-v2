@@ -1,4 +1,4 @@
-h1 {
+[href] {
   cursor: pointer;
 }
 
@@ -7,6 +7,10 @@ h1 {
   background: #ccc;
   color: #000;
   padding: 0.2em 0;
+}
+
+.md-toolbar-tools a {
+  text-decoration: underline;
 }
 
 .thumbnail {
@@ -110,4 +114,28 @@ h1 {
     border-right-color: rgb(255, 64, 129);
     right: 0;
   }
+}
+
+md-tabs {
+  height: calc(100vh - 128px);
+}
+
+md-tab-content {
+  background: white;
+}
+
+md-ink-bar {
+  top: 0;
+}
+
+md-fab-speed-dial {
+  position: fixed;
+  bottom: 40px;
+  right: 40px;
+}
+
+.follow-logs-button {
+  bottom: 115px;
+  position: fixed;
+  right: 40px;
 }

@@ -1,7 +1,7 @@
 (function () {
 'use strict';
 
-/*jshint strict: true */
+/*jshint strict: true, camelcase: false */
 /*globals _,angular,moment*/
 
 angular.module('totemDashboard')
@@ -35,6 +35,10 @@ angular.module('totemDashboard')
 
       if (source['started-at']) {
         source.startedAt = moment(source['started-at'], format);
+      }
+
+      if (source['state-updated']) {
+        source.stateUpdated = moment(source['state-updated'], format);
       }
 
       source.moment = moment(source.date, format);
@@ -289,6 +293,14 @@ angular.module('totemDashboard')
 
     this.deleteDeployment = function (appName, deployerUrl) {
       return $http.delete(deployerUrl + '/apps/' + appName);
+    };
+
+    this.restoreDeployment = function (appName, version, state, deployerUrl) {
+      return $http.post(deployerUrl + '/recovery', {
+        name: appName,
+        version: version,
+        state: state
+      });
     };
 
     this.getJobEvents = function(jobId) {

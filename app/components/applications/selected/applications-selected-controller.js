@@ -39,7 +39,7 @@ angular.module('totemDashboard')
   };
 })
 
-.controller('ApplicationsSelectedContoller', ['$document', '$scope', '$stateParams', '$websocket', '$mdToast', '$window', '$location', 'api', 'logs', function($document, $scope, $stateParams, $websocket, $mdToast, $window, $location, api, logService) {
+.controller('ApplicationsSelectedContoller', ['$document', '$scope', '$stateParams', '$websocket', '$mdToast', '$mdDialog', '$mdSidenav', '$window', '$location', '$timeout', '$interval', 'api', 'logs', function($document, $scope, $stateParams, $websocket, $mdToast, $mdDialog, $mdSidenav, $window, $location, $timeout, $interval, api, logService) {
   $scope.application = null;
   $scope.events = [];
   $scope.ganttData = [];
@@ -214,7 +214,16 @@ angular.module('totemDashboard')
     api.getJobEvents(deployment.metaInfo.jobId).then(function(results) {
       updateEvents(results.events, deployment.metaInfo.deployer.name);
       $scope.events = results;
+      $scope.loaded = true;
     });
+
+    if (deployment.state === 'NEW' || deployment.state === 'STARTED') {
+      $scope.updateInterval = $interval(function () {
+        $scope.refresh();
+      }, 30000);
+    } else if ($scope.updateInterval) {
+      $scope.updateInterval.cancel();
+    }
   });
 
   $scope.isPublicACL = function(location) {
@@ -276,28 +285,111 @@ angular.module('totemDashboard')
     });
   };
 
-  $scope.deleteDeployment = function (deployment) {
+  $scope.restoreDeployment = function (deployment) {
+    $scope.working = true;
+    api.restoreDeployment(deployment.deployment.name, deployment.deployment.version, deployment.state, deployment.metaInfo.deployer.url).then(function () {
+      $timeout(function () {
+        $scope.load();
+        $scope.working = false;
+      }, 10000);
+    });
+  };
+
+  function deleteDeployment (deployment) {
     $scope.working = true;
     api.deleteDeployment(deployment.deployment.name, deployment.metaInfo.deployer.url).then(function () {
       $scope.working = false;
       $scope.selected.deployment.decomissionStarted = true;
     });
+  }
+
+  $scope.deleteDialog = function (event, deployment) {
+    var confirm = $mdDialog.confirm()
+          .title('Confirm decommission')
+          .content('Are you sure you want to decommission this deployment?')
+          .ok('No') // Swapping here to make "no" the default
+          .cancel('Yes')
+          .targetEvent(event);
+
+    $mdDialog.show(confirm).catch(function () {
+      deleteDeployment(deployment);
+    });
+  };
+
+  $scope.toggleSidenav = function () {
+    $mdSidenav('left').toggle();
+  };
+
+  $scope.getTiming = function (deployment) {
+    if (!deployment) {
+      return;
+    }
+
+    var stateUpdated;
+
+    if (deployment.stateUpdated) {
+      stateUpdated = deployment.stateUpdated;
+    } else if (deployment['state-updated']) {
+      stateUpdated = moment(deployment['state-updated']);
+    } else {
+      stateUpdated = moment(deployment.modified);
+    }
+
+    var diff = stateUpdated.fromNow(),
+        message;
+
+    switch (deployment.state) {
+      case 'PROMOTED':
+        diff = moment.duration(moment().diff(stateUpdated)).humanize();
+        message = 'up for ' + diff;
+        break;
+      case 'DECOMMISSIONED':
+        message = 'deleted ' + diff;
+        break;
+      case 'FAILED':
+        message = 'failed ' + diff;
+        break;
+      case 'STARTED':
+        message = 'started ' + diff;
+        break;
+      case 'NEW':
+        message = 'created ' + diff;
+        break;
+    }
+
+    return message;
+  };
+
+  $scope.getCommitLink = function (deployment) {
+    try {
+      var gitInfo = deployment.metaInfo.git;
+
+      if (gitInfo.type === 'github') {
+        return 'https://github.com/' + gitInfo.owner + '/' + gitInfo.repo + '/commit/' + gitInfo.commit;
+      }
+    } catch (err) {}
   };
 
   $scope.open = function (location) {
     $window.open('http://' + location.hostname + location.path);
   };
 
-  $scope.load = function() {
+  $scope.refresh = function () {
+    $scope.load($scope.selected.deployment);
+  };
+
+  $scope.load = function (deployment) {
     api.getApplication($stateParams.owner, $stateParams.repo, $stateParams.ref).then(function(results) {
       $scope.application = results;
       $scope.application.ref = results.refs[$stateParams.ref];
 
       try {
-        $scope.selected.deployment = results.ref.deployments[0];
+        if (deployment) {
+          $scope.selected.deployment = _.findWhere(results.ref.deployments, {id: deployment.id});
+        } else {
+          $scope.selected.deployment = results.ref.deployments[0];
+        }
       } catch (err) {}
-
-      $scope.loaded = true;
     }, function(error) {
       $mdToast.show($mdToast.simple().position('top left').content('Error Getting Application!'));
       console.error(error);
