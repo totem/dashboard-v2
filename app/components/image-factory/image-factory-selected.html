@@ -1,0 +1,29 @@
+<md-content class="md-whiteframe-1dp" layout-margin="5">
+  <div layout="column" flex="" layout-fill="" layout-padding="5">
+    <div>
+      image: {{ job.image }}
+    </div>
+    <div>
+      repository: <a href="https://github.com/{{job.context.owner}}/{{job.context.repo}}">{{job.context.owner}}/{{job.context.repo}}</a> - <a href="https://github.com/{{job.context.owner}}/{{job.context.repo}}/tree/{{job.context.branch}}">{{job.context.branch}}</a> - <a href="https://github.com/{{job.context.owner}}/{{job.context.repo}}/commit/{{job.context.commit}}">{{job.context.commit}}</a>
+    </div>
+  </div>
+  <div layout="row" flex="" layout-fill="" layout-padding="5">
+    <div>
+      status: {{ job.status }}
+    </div>
+    <div>
+      started: {{ job.startMoment | ago }}
+    </div>
+    <div>
+      ended: {{ job.endMoment | ago }}
+    </div>
+  </div>
+</md-content>
+<md-content class="md-whiteframe-1dp" layout-margin="5" layout-padding="5">
+  <p>
+    Logs
+    <md-button ng-click="loadLogs()" class="md-raised">Refresh</md-button>
+  </p>
+
+  <log></log>
+</md-content>

@@ -1,0 +1,42 @@
+<div layout="column" flex="" layout-fill="" layout-margin="5">
+<md-content class="md-whiteframe-1dp" layout-padding="2.5">
+  <md-input-container md-no-float>
+    <label>Filter By</label>
+    <input ng-model="filterBy.repositoryDetails" type="text" placeholder="Filter by">
+  </md-input-container>
+
+  <md-input-container md-no-float>
+    <label>Showing</label>
+    <input ng-model="limitCount">
+  </md-input-container>
+</md-content>
+
+<div>
+  <md-content class="md-padding md-whiteframe-1dp">
+    <div layout="row" layout-sm="column">
+      <table class="mdl-data-table mdl-js-data-table" width="100%">
+        <thead>
+          <tr>
+            <th class="mdl-data-table__cell--non-numeric">ID</th>
+            <th class="mdl-data-table__cell--non-numeric">Status</th>
+            <th class="mdl-data-table__cell--non-numeric">Started</th>
+            <th class="mdl-data-table__cell--non-numeric">Finished</th>
+            <th class="mdl-data-table__cell--non-numeric">Repository</th>
+            <th class="mdl-data-table__cell--non-numeric">Commit</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr ng-repeat="entry in data.jobs | orderBy:predicate:reverse | filter:filterBy | limitTo:limitCount" ng-click="selectJob(entry)">
+            <td class="mdl-data-table__cell--non-numeric"><a ui-sref="app.image-factory-selected({ job: entry.id })">{{entry.id}}</a></td>
+            <td class="mdl-data-table__cell--non-numeric">{{entry.status}}</td>
+            <td class="mdl-data-table__cell--non-numeric">{{entry.startMoment | ago }}</td>
+            <td class="mdl-data-table__cell--non-numeric">{{entry.endMoment | ago }}</td>
+            <td class="mdl-data-table__cell--non-numeric">{{entry.repositoryDetails}}</td>
+            <td class="mdl-data-table__cell--non-numeric"><a href="https://github.com/{{entry.context.owner}}/{{entry.context.repo}}/commit/{{entry.context.commit}}">{{ entry.context.commit | truncate:10 }}</a></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </md-content>
+</div>
+</div>
