@@ -43,7 +43,8 @@ opts.inject = {
     'app/bower/angular-material/angular-material.js',
     'app/bower/elasticsearch/elasticsearch.angular.js',
     'app/bower/json-formatter/dist/json-formatter.js',
-    'app/bower/DateJS/build/production/date.min.js'
+    'app/bower/DateJS/build/production/date.min.js',
+    'app/lib/ansiparse/ansiparse.js'
   ],
   app: [
     'app/app.js',
@@ -125,14 +126,26 @@ gulp.task('html', function() {
 });
 
 gulp.task('scripts', ['html'], function () {
-  return gulp.src(['app/**/*.js', '!app/bower/**/*.js'])
+  return gulp.src(['app/**/*.js', '!app/bower/**/*.js', '!app/lib/**/*.js'])
     .pipe(jshint())
     .pipe(jshint.reporter(require('jshint-stylish')))
     .pipe(gulp.dest(paths.dist))
     .pipe(connect.reload());
 });
 
-gulp.task('assemble', ['bower', 'styles', 'html', 'scripts']);
+gulp.task('images', function() {
+  return gulp.src(['app/img/**/*'])
+    .pipe(gulp.dest(paths.dist + '/img'))
+    .pipe(connect.reload());
+});
+
+gulp.task('libraries', function() {
+  return gulp.src(['app/lib/**/*'])
+    .pipe(gulp.dest(paths.dist + '/lib'))
+    .pipe(connect.reload());
+})
+
+gulp.task('assemble', ['bower', 'styles', 'html', 'scripts', 'images']);
 gulp.task('build', ['config']);
 
 gulp.task('config', ['assemble'], function () {

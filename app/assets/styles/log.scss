@@ -1,0 +1,85 @@
+.log {
+  font-family: monospace;
+  font-size: 12px;
+  max-height: 650px;
+  overflow: auto;
+}
+
+.log .fold,
+.log .single {
+  box-sizing: border-box;
+  display: block;
+  height: 20px;
+  overflow: hidden;
+  padding-left: 25px;
+  position: relative;
+}
+
+.log .single {
+  cursor: auto;
+  height: auto;
+}
+
+.log .fold {
+}
+
+.log .open {
+  height: auto;
+}
+
+.log .fold .arrow {
+  color: #017dc3;
+  font-size: 14px;
+  font-weight: bold;
+  left: 5px;
+  position: absolute;
+  top: 2px;
+}
+
+.log .fold .toggle {
+  background: none;
+  cursor: pointer;
+  display: block;
+  height: 100%;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+
+.log .open .toggle {
+  background: url(/img/sprite.png) 0 0 repeat-y;
+  width: 20px;
+}
+
+.log .open .arrow {
+  display: none;
+}
+
+.log .section {
+  display: inline-block;
+  width: 100%;
+}
+
+/* Log formatting */
+.bold { font-weight: bold; }
+.italic { font-style: italic; }
+.underline { text-decoration: underline; }
+
+.black { color: black; }
+.green { color: green; }
+.red { color: red; }
+.yellow { color: rgb(189, 189, 0); }
+.blue { color: blue; }
+.magenta { color: magenta; }
+.cyan { color: rgb(0, 133, 255); }
+.white { color: white; }
+
+.bg-black { background-color: black; }
+.bg-green { background-color: green; }
+.bg-red { background-color: red; }
+.bg-yellow { background-color: rgb(189, 189, 0); }
+.bg-blue { background-color: blue; }
+.bg-magenta { background-color: magenta; }
+.bg-cyan { background-color: rgb(0, 133, 255);; }
+.bg-white { background-color: white; }

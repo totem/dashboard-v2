@@ -14,7 +14,7 @@ angular.module('totemDashboard')
         templateUrl: 'components/base/base.html',
         resolve: {
           env: function (configService) {
-            return configService.getRaw();
+            return configService.get();
           }
         }
       });
