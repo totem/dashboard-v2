@@ -1,12 +1,17 @@
+(function () {
 'use strict';
 
 angular.module('totemDashboard')
-  .service('configService', ['$http', '$q', 'totemConfigUrl', function ($http, $q, totemConfigUrl) {
+  .service('configService', ['$window', '$http', '$q', 'totemConfigUrl', function ($window, $http, $q, totemConfigUrl) {
     var self = this;
-    this.settings = null;
 
     this.get = function () {
       var deferred = $q.defer();
+
+      try {
+        this.settings = angular.fromJson($window.sessionStorage.getItem('totem.dashboard.config'));
+      } catch(err) {
+      }
 
       if (!this.settings) {
         this.getRaw()
@@ -18,6 +23,9 @@ angular.module('totemDashboard')
           })
         ;
       } else {
+        // Still load the config from remote to support updating it without slowing down the current session.
+        this.getRaw();
+        // Resolve the loaded settings
         deferred.resolve(this.settings);
       }
 
@@ -26,6 +34,8 @@ angular.module('totemDashboard')
 
     this.getRaw = function () {
       return $http.get(totemConfigUrl).success(function (data) {
+        // Also save the config to session storage
+        $window.sessionStorage.setItem('totem.dashboard.config', angular.toJson(data));
         self.settings = data;
       });
     };
@@ -35,3 +45,4 @@ angular.module('totemDashboard')
     return configService.settings;
   }])
 ;
+})();
