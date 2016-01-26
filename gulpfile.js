@@ -146,9 +146,9 @@ gulp.task('libraries', function() {
 })
 
 gulp.task('assemble', ['bower', 'styles', 'html', 'scripts', 'images']);
-gulp.task('build', ['config']);
+gulp.task('build', ['assemble']);
 
-gulp.task('config', ['assemble'], function () {
+gulp.task('config', function () {
   gulp.src('app/config.json')
     .pipe(ngConstant({
       name: 'totemDashboard',
@@ -240,7 +240,5 @@ gulp.task('serve:prod', ['config'], serve({
     port: 3000
 }));
 
-gulp.task('serve:dist', ['serve:prod']);
-
 // Default task
-gulp.task('default', ['config', 'livereload', 'serve']);
+gulp.task('default', ['assemble', 'config', 'livereload', 'serve']);
