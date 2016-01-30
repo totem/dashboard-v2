@@ -1,40 +1,37 @@
-<div>
-  <md-input-container class="md-icon-float" md-no-float>
-    <md-icon class="material-icons">search</md-icon>
-    <input ng-model="search.$" type="text" placeholder="Search">
-  </md-input-container>
-</div>
+<div class="md-padding">
+  <div layout layout-sm="column">
+    <md-input-container flex>
+      <md-icon class="material-icons">search</md-icon>
+      <input ng-model="search.$" type="text" placeholder="any field">
+    </md-input-container>
+    <md-input-container flex>
+      <input ng-model="search.owner" type="text" placeholder="owner">
+    </md-input-container>
+    <md-input-container flex>
+      <input ng-model="search.repo" type="text" placeholder="repo">
+    </md-input-container>
+    <md-input-container flex>
+      <input ng-model="search.refs" type="text" placeholder="ref">
+    </md-input-container>
+  </div>
 
-<div layout="row" layout-wrap>
-  <div flex="33" ng-repeat="tile in data.applications | filter:search:strict">
-    <md-card>
-      <md-card-content>
-        <h2 class="md-title">{{tile.owner}} {{tile.repo}}</h2>
-      </md-card-content>
+  <div layout="row" layout-wrap>
+    <div flex="25" ng-repeat="app in data.applications | filter:search:strict">
+      <md-card class="totem-app" ui-sref='app.applicationsSelected.summary({owner: app.owner, repo: app.repo, ref: "develop"})'>
+        <md-card-title>
+          <span class="md-headline">{{ app.repo }}</span>
+          <span class="md-subhead">{{ app.owner }}</span>
+        </md-card-title>
 
-      <div class="md-actions inset" layout="row" layout-align="end center">
-        <md-button ng-if="hasBranch('master', tile)" ui-sref='app.applicationsSelected({owner: tile.owner, repo: tile.repo, ref: "master"})'>
-          <md-tooltip>{{ tile.refs.master.state | lowercase }} {{ tile.refs.master.deployments[0].stateUpdated.fromNow() }}</md-tooltip>
-          master
-        </md-button>
-        <md-button ng-if="hasBranch('develop', tile)" class="md-primary" ui-sref='app.applicationsSelected({owner: tile.owner, repo: tile.repo, ref: "develop"})'>
-          <md-tooltip>{{ tile.refs.develop.state | lowercase }} {{ tile.refs.develop.deployments[0].stateUpdated.fromNow() }}</md-tooltip>
-          develop
-        </md-button>
-        <md-menu>
-          <md-button ng-click="$mdOpenMenu($event)">
-            <md-tooltip>branches</md-tooltip>
-            <md-icon class="material-icons">more_horiz</md-icon>
+        <md-card-actions layout="row" layout-align="end center">
+          <md-button ng-if="app.refs.master" ui-sref='app.applicationsSelected.summary({owner: app.owner, repo: app.repo, ref: "master"})'>
+            master
           </md-button>
-          <md-menu-content width="4">
-            <md-menu-item ng-repeat="ref in tile.refs">
-              <md-button ui-sref='app.applicationsSelected({owner: tile.owner, repo: tile.repo, ref: ref.ref})'>
-                {{ref.ref}} ({{ ref.state | lowercase }} {{ ref.deployments[0].stateUpdated.fromNow() }})
-              </md-button>
-            </md-menu-item>
-          </md-menu-content>
-        </md-menu>
-      </div>
-    </md-card>
+          <md-button ng-if="app.refs.develop" class="md-primary" ui-sref='app.applicationsSelected.summary({owner: app.owner, repo: app.repo, ref: "develop"})'>
+            develop
+          </md-button>
+        </md-card-actions>
+      </md-card>
+    </div>
   </div>
 </div>

@@ -28,8 +28,9 @@ opts.inject = {
   bower: [
     'app/bower/jquery/dist/jquery.min.js',
     'app/bower/lodash/lodash.min.js',
-    'app/bower/angular/angular.js',
     'app/bower/moment/moment.js',
+    'app/lib/ansiparse/ansiparse.js',
+    'app/bower/angular/angular.js',
     'app/bower/angular-ui-router/release/angular-ui-router.js',
     'app/bower/angular-animate/angular-animate.js',
     'app/bower/angular-aria/angular-aria.js',
@@ -43,8 +44,7 @@ opts.inject = {
     'app/bower/angular-material/angular-material.js',
     'app/bower/elasticsearch/elasticsearch.angular.js',
     'app/bower/json-formatter/dist/json-formatter.js',
-    'app/bower/DateJS/build/production/date.min.js',
-    'app/lib/ansiparse/ansiparse.js'
+    'app/bower/DateJS/build/production/date.min.js'
   ],
   app: [
     'app/app.js',
@@ -126,7 +126,7 @@ gulp.task('html', function() {
 });
 
 gulp.task('scripts', ['html'], function () {
-  return gulp.src(['app/**/*.js', '!app/bower/**/*.js', '!app/lib/**/*.js'])
+  return gulp.src(['app/**/*.js', '!app/bower/**/*.js', '!app/lib/**/*.js', '!app/config.js'])
     .pipe(jshint())
     .pipe(jshint.reporter(require('jshint-stylish')))
     .pipe(gulp.dest(paths.dist))
@@ -145,7 +145,7 @@ gulp.task('libraries', function() {
     .pipe(connect.reload());
 })
 
-gulp.task('assemble', ['bower', 'styles', 'html', 'scripts', 'images']);
+gulp.task('assemble', ['bower', 'styles', 'libraries', 'html', 'scripts', 'images']);
 gulp.task('build', ['assemble']);
 
 gulp.task('config', function () {

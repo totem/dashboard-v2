@@ -21,14 +21,6 @@ angular.module('totemDashboard')
 .controller('ApplicationsContoller', ['$scope', 'api', function($scope, api) {
   $scope.data = {};
 
-  $scope.hasBranch = function(branchName, app) {
-    if (branchName in app.refs) {
-      return true;
-    } else {
-      return false;
-    }
-  };
-
   $scope.load = function() {
     api.listApplications().then(function(results) {
       $scope.data.applications = results;

@@ -13,6 +13,16 @@ angular.module('totemDashboard')
 
       return moment(when).fromNow();
     };
-  });
+  })
+  .filter('humanizeTimeDiff', function() {
+    return function(when) {
+      if (when === undefined || when === null) {
+        return '';
+      }
+
+      return moment.duration(moment().diff(when)).humanize();
+    };
+  })
+;
 
 })();

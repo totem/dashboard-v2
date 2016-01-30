@@ -2,7 +2,7 @@
 'use strict';
 
 /*jshint strict: true */
-/*globals _,angular,moment,console,$,document*/
+/*globals _,angular,moment,$,document*/
 
 angular.module('totemDashboard')
 .config(['$stateProvider', function($stateProvider) {
@@ -13,6 +13,36 @@ angular.module('totemDashboard')
         'main@app': {
           controller: 'ApplicationsSelectedContoller',
           templateUrl: 'components/applications/selected/applications-selected.html'
+        }
+      }
+    });
+  $stateProvider
+    .state('app.applicationsSelected.summary', {
+      url: '/summary',
+      views: {
+        'page': {
+          controller: 'ApplicationsSelectedSummaryContoller',
+          templateUrl: 'components/applications/selected/applications-selected-summary.html'
+        }
+      }
+    });
+  $stateProvider
+    .state('app.applicationsSelected.logs', {
+      url: '/logs',
+      views: {
+        'page': {
+          controller: 'ApplicationsSelectedLogsContoller',
+          templateUrl: 'components/applications/selected/applications-selected-logs.html'
+        }
+      }
+    });
+  $stateProvider
+    .state('app.applicationsSelected.diagnostic', {
+      url: '/diagnostic',
+      views: {
+        'page': {
+          controller: 'ApplicationsSelectedDiagnosticContoller',
+          templateUrl: 'components/applications/selected/applications-selected-diagnostic.html'
         }
       }
     });
@@ -39,10 +69,410 @@ angular.module('totemDashboard')
   };
 })
 
-.controller('ApplicationsSelectedContoller', ['$document', '$scope', '$stateParams', '$websocket', '$mdToast', '$mdDialog', '$mdSidenav', '$window', '$location', '$timeout', '$interval', 'api', 'logs', function($document, $scope, $stateParams, $websocket, $mdToast, $mdDialog, $mdSidenav, $window, $location, $timeout, $interval, api, logService) {
+.controller('ApplicationsSelectedContoller', ['$log', '$scope', '$state', '$stateParams', '$mdToast', '$mdDialog', '$mdSidenav', '$timeout', '$interval', 'api', function($log, $scope, $state, $stateParams, $mdToast, $mdDialog, $mdSidenav, $timeout, $interval, api) {
+
+  // Used to control the loading/working overlay]
+  $scope.loaded = false;
+  $scope.working = false;
+
+  $scope.fabIsOpen = false;
+
   $scope.application = null;
-  $scope.events = [];
-  $scope.ganttData = [];
+
+  $scope.ganttOptions = {
+    from: null,
+    to: null,
+    scale: null
+  };
+
+  $scope.events = null;
+  $scope.selected = {
+    deployment: null
+  };
+
+  $scope.diagnostic = {
+    events: []
+  };
+
+  $scope.autoReload = true;
+  $scope.updateInterval = null;
+
+  $scope.friendlyState = {
+    'PROMOTED': 'up for',
+    'DECOMMISSIONED': 'deleted',
+    'FAILED': 'failed',
+    'STARTED': 'started',
+    'NEW': 'created'
+  };
+
+  $scope.$watch('selected.deployment', function(deployment) {
+    // Make sure to cancel the timer if the deployment changes
+    $scope.toggleAutoReload(false);
+    if (_.isUndefined(deployment) || _.isNull(deployment)) {
+      return;
+    }
+
+    // If the deployment is still happening refresh automatically.
+    if (deployment.state === 'NEW' || deployment.state === 'STARTED') {
+      $scope.toggleAutoReload(true);
+    }
+  });
+
+  $scope.toggleAutoReload = function(value) {
+    // Try and cancel
+    if ($scope.updateInterval) {
+      $interval.cancel($scope.updateInterval);
+    }
+
+    // What ya get from the button click
+    if (_.isUndefined(value)) {
+      $scope.autoReload = !$scope.autoReload;
+    }
+    else {
+      // Used during changing of a deployment
+      $scope.autoReload = value;
+    }
+
+    if ($scope.autoReload) {
+      $scope.updateInterval = $interval(function () {
+        $scope.refresh();
+      }, 30 * 1000);
+    }
+  };
+
+  function getNodes(deployment) {
+    if (!deployment.runtime.units) {
+      return [];
+    }
+
+    return _.chain(deployment.runtime.units)
+      .reduce(function(acc, unit) {
+        // Only add the application units
+        if (unit.unit.indexOf('app') < 0) {
+          return acc;
+        }
+
+        var address = unit.machine.split('/')[1],
+            id = unit.machine.split('/')[0];
+
+        acc[address] = acc[address] || {
+          id: id,
+          address: address,
+          units: []
+        };
+
+        var data = angular.merge({upstreams: {}}, unit);
+
+        _.each(deployment.runtime['proxy-upstreams'], function(upstream, port) {
+          data.upstreams[port] = _.findWhere(upstream, {'service-name': data.unit});
+        });
+
+        acc[address].units.push(data);
+
+        return acc;
+      }, {})
+      .map()
+      .value();
+  }
+
+  function _eventsRaw(events) {
+    // Convert totem events into a basic set of row and task combinations
+    function getType(eve) {
+      return eve.type.toLowerCase().split('_').join(' ');
+    }
+
+    // Count each event type to support proper numbering
+    var typeCounts = _.reduce(events, function(acc, eve) {
+      var type = getType(eve);
+      acc[type] = acc[type] || {
+        count: 0,
+        on: 0
+      };
+
+      acc[type].count++;
+
+      return acc;
+    }, {});
+
+    return _.chain(events)
+      .reduce(function(rows, eve, index) {
+        // make sure the component has a row
+        rows[eve.component] = rows[eve.component] || {
+          name: eve.component,
+          children: [],
+          tasks: [{
+            name: '',
+            classes: 'overview-task',
+            from: eve.moment
+          }]
+        };
+
+        // set the end time for this component to the end of the last task
+        rows[eve.component].tasks[0].to = eve.moment;
+
+        var type = getType(eve);
+
+        if (typeCounts[type].count > 1) {
+          type = [type, ++typeCounts[type].on].join(' ');
+        }
+
+        rows[eve.component].children.push(type);
+
+        rows[type] = {
+          name: type,
+          tasks: [{
+            name: '',          
+            classes: 'totem-event',
+            from: eve.moment
+          }]
+        };
+
+        if (index < events.length - 1) {
+          rows[type].tasks[0].to = events[index + 1].moment;
+        }
+
+        return rows;
+      }, {})
+      .map()
+      .value();
+  }
+
+  function _eventsByPhase(events) {
+    /*
+    Group the events into meaningful phases.
+
+    Build: _START_ till DEPLOY_REQUESTED
+    Deployment:
+      Prep: NEW_DEPLOYMENT till UPSTREAMS_REGISTERED
+      Pull: "UNITS_ADDED" till "NODES_DISCOVERED"
+      Deploy: "UNITS_DEPLOYED" till "WIRED"
+    Cleanup: "WIRED" till "PROMOTED"
+    */
+    function gen(name, classes, opts) {
+      if (_.isUndefined(classes) || _.isNull(classes)) {
+        classes = 'totem-event';
+      }
+
+      if (_.isUndefined(opts) || _.isNull(opts)) {
+        opts = {};
+      }
+
+      return angular.merge({}, {
+        name: name,
+        tasks: [{
+          name: null,
+          classes: classes,
+          from: null,
+          to: null
+        }]
+      }, opts);
+    }
+
+    // Can be moved to configuration and generated.
+    var phases = [
+      gen('Build'), // 0
+      gen('Deployment', 'overview-task', {children: ['Prep', 'Pull', 'Run']}),
+      gen('Prep'), // 2
+      gen('Pull'), // 3
+      gen('Run'), // 4
+      gen('Cleanup') // 5
+    ];
+
+    // Can be moved to configuration and generated.
+    var endPhases = {
+      start: function() { return phases[0].tasks[0]; },
+      parent: function() { return null; },
+      'DEPLOY_REQUESTED': {
+        next: function() { return phases[2].tasks[0]; },
+        parent: function() { return phases[1].tasks[0]; }
+      },
+      'UPSTREAMS_REGISTERED': {
+        next: function() { return phases[3].tasks[0]; },
+        parent: function() { return phases[1].tasks[0]; }
+      },
+      'NODES_DISCOVERED': {
+        next: function() { return phases[4].tasks[0]; },
+        parent: function() { return phases[1].tasks[0]; }
+      },
+      'WIRED': {
+        next: function() { return phases[5].tasks[0]; },
+        parent: function() { return null; }
+      },
+      'PROMOTED': {
+        next: function() { return null; },
+        parent: function() { return null; }
+      }
+    };
+
+    var currentPhase = endPhases.start();
+    var currentParent = endPhases.parent();
+
+    _.each(events, function(eve) {
+      if (currentPhase) {
+        // accounts for the start of the cycle
+        if (!currentPhase.to) {
+          currentPhase.to = eve.moment;
+        }
+
+        currentPhase.from = eve.moment;
+
+        if (currentParent) {
+          currentParent.from = eve.moment;
+        }
+      }
+
+      // If we're on an end event, set the new phase and parent
+      if (_.has(endPhases, eve.type)) {
+        currentPhase = endPhases[eve.type].next();
+        currentParent = endPhases[eve.type].parent();
+
+        // TODO: This shouldn't need to be done here, should be caught above.
+        if (currentPhase) {
+          currentPhase.to = eve.moment;
+        }
+
+        if (currentParent && !currentParent.to) {
+          currentParent.to = eve.moment;
+        }
+      }
+    });
+
+    // for each task in each phase, set the name to the duration if the name isn't set.
+    _.each(phases, function(phase) {
+      _.each(phase.tasks, function(task) {
+        if (task.name !== null) {
+          return;
+        }
+
+        task.name = moment.duration(task.from.diff(task.to)).humanize();
+      });
+    });
+
+    return phases;
+  }
+
+  function processEvents(deployment, events, raw) {
+    // Size the gantt for the short time frame
+    $scope.ganttOptions.from = _.first(events).moment;
+    $scope.ganttOptions.to = _.last(events).moment;
+    $scope.ganttOptions.scale = Math.ceil($scope.ganttOptions.to.diff($scope.ganttOptions.from, 'minutes') / 12) + ' minutes';
+
+    if (raw === true) {
+      $scope.events = _eventsRaw(events);
+    } else {
+      $scope.events = _eventsByPhase(events);      
+    }
+  }
+
+  function processDeployment(deployment) {
+    // start getting the events for the deployment
+    api.getJobEvents(deployment.metaInfo.jobId).then(function(results) {
+      $scope.diagnostic.events = results.events;
+      processEvents(deployment, results.events);
+    });
+
+    deployment.nodes = getNodes(deployment);
+
+    // add each location for each proxy
+    deployment._locations = _.reduce(deployment.proxyMeta, function(acc, proxy) {
+      _.each(proxy.locations, function(loc) {
+        acc.push({
+          hostname: loc.hostname,
+          path: loc.path,
+          port: loc.port,
+          acls: loc['allowed-acls'].join(', '),
+          isPublic: (loc['allowed-acls'].indexOf('public') >= 0),
+          url: 'http://' + loc.hostname + loc.path
+        });
+      });
+
+      return acc;
+    }, []);
+
+    $scope.selected.deployment = deployment;
+  }
+
+  $scope.restoreDeployment = function (deployment) {
+    $scope.working = true;
+    api.restoreDeployment(deployment.deployment.name, deployment.deployment.version, deployment.state, deployment.metaInfo.deployer.url).then(function () {
+      $timeout(function () {
+        $scope.load();
+        $scope.working = false;
+      }, 10000);
+    });
+  };
+
+  function deleteDeployment (deployment) {
+    $scope.working = true;
+    api.deleteDeployment(deployment.deployment.name, deployment.metaInfo.deployer.url).then(function () {
+      $scope.working = false;
+      $scope.selected.deployment.decomissionStarted = true;
+    });
+  }
+
+  $scope.deleteDialog = function (event, deployment) {
+    var confirm = $mdDialog.confirm()
+          .title('Confirm decommission')
+          .content('Are you sure you want to decommission this deployment?')
+          .ok('No') // Swapping here to make "no" the default
+          .cancel('Yes')
+          .targetEvent(event);
+
+    $mdDialog.show(confirm).catch(function () {
+      deleteDeployment(deployment);
+    });
+  };
+
+  $scope.toggleSidenav = function () {
+    $mdSidenav('left').toggle();
+  };
+
+  $scope.getCommitLink = function (deployment) {
+    try {
+      var gitInfo = deployment.metaInfo.git;
+
+      if (gitInfo.type === 'github') {
+        return 'https://github.com/' + gitInfo.owner + '/' + gitInfo.repo + '/commit/' + gitInfo.commit;
+      }
+    } catch (err) {}
+  };
+
+  $scope.refresh = function () {
+    $scope.load($scope.selected.deployment);
+  };
+
+  $scope.load = function (deployment) {
+    if ($state.current.name === 'app.applicationsSelected') {
+      $state.go('app.applicationsSelected.summary');
+    }
+
+    api.getApplication($stateParams.owner, $stateParams.repo, $stateParams.ref).then(function(results) {
+      $scope.application = results;
+      $scope.application.ref = results.refs[$stateParams.ref];
+
+      try {
+        if (deployment) {
+          processDeployment(_.findWhere(results.ref.deployments, {id: deployment.id}));
+        } else {
+          processDeployment(results.ref.deployments[0]);
+        }
+      } catch (err) {
+        $log.error('unable to select a deployment', err);
+      }
+      $scope.loaded = true;
+    }, function(error) {
+      $mdToast.show($mdToast.simple().position('top left').content('Error Getting Application!'));
+      $log.error(error);
+    });
+  };
+
+  $scope.load();
+}])
+
+.controller('ApplicationsSelectedSummaryContoller', [function() {
+}])
+
+.controller('ApplicationsSelectedLogsContoller', ['$scope', '$stateParams', 'logs', function($scope, $stateParams, logService) {
   $scope.logs = {
     date: '',
     interval: 5,
@@ -51,50 +481,9 @@ angular.module('totemDashboard')
     status: null,
     messages: [],
     scroll: true,
-    viewing: false,
     showTimestamp: false,
     filter: {}
   };
-
-  $scope.selected = {
-    deployment: null
-  };
-
-  function getNodes(deployment) {
-    var machines = {},
-        units = deployment.runtime.units,
-        upstreams = deployment.runtime['proxy-upstreams'];
-
-    if (!units) {
-      return [];
-    }
-
-    _.each(units, function (unit) {
-      if (unit.unit.indexOf('app') === -1) {
-        return [];
-      }
-
-      var address = unit.machine.split('/')[1],
-          id = unit.machine.split('/')[0];
-
-      machines[address] = machines[address] || {
-        id: id,
-        address: address,
-        units: [],
-      };
-
-      var clonedUnit = _.cloneDeep(unit);
-      clonedUnit.upstreams = {};
-
-      _.each(upstreams, function (upstream, port) {
-        clonedUnit.upstreams[port] = _.findWhere(upstream, {'service-name': clonedUnit.unit});
-      });
-
-      machines[address].units.push(clonedUnit);
-    });
-
-    return _.valuesIn(machines);
-  }
 
   function logScroll() {
     if ($scope.logs.scroll) {
@@ -103,136 +492,6 @@ angular.module('totemDashboard')
       }, 'slow');
     }
   }
-
-  function updateEvents (events, clusterName) {
-    var data = $scope.ganttData;
-    data.length = 0;
-
-    var findCluster = {deployer: {cluster: clusterName}},
-        newDeploymentEvent = _.findWhere(events, {type: 'NEW_DEPLOYMENT', metaInfo: findCluster}),
-        nodesDiscoveredEvent = _.findWhere(events, {type: 'NODES_DISCOVERED', metaInfo: findCluster}),
-        deploymentCheckEvent = _.findWhere(events, {type: 'DEPLOYMENT_CHECK_PASSED', metaInfo: findCluster}),
-        wiredEvent = _.findWhere(events, {type: 'WIRED', metaInfo: findCluster}),
-        promotedEvent = _.findWhere(events, {type: 'PROMOTED', metaInfo: findCluster}),
-        newJobEvent = _.findWhere(events, {type: 'NEW_JOB'}),
-        deployRequestedEvent = _.findWhere(events, {type: 'DEPLOY_REQUESTED'});
-
-    var sortedEvents = {
-      'Deploy Application': {
-        start: newDeploymentEvent,
-        end: nodesDiscoveredEvent
-      },
-      'Validate Application': {
-        start: nodesDiscoveredEvent,
-        end: deploymentCheckEvent
-      },
-      'Wire Application': {
-        start: deploymentCheckEvent,
-        end: wiredEvent
-      },
-      Cleanup: {
-        start: wiredEvent,
-        end: promotedEvent
-      }
-    };
-
-    data.push({
-      name: 'Build + CI',
-      id: 'build-ci',
-      classes: 'build-ci-row',
-      tasks: [{
-        name: moment.duration(deployRequestedEvent.moment.diff(newJobEvent.moment)).humanize(),
-        classes: 'build-ci-task',
-        from: newJobEvent.moment,
-        to: deployRequestedEvent.moment
-      }]
-    });
-
-    var parent = {
-      name: 'Deployment',
-      id: clusterName,
-      classes: 'parent-row',
-      tasks: []
-    };
-
-    _.each(sortedEvents, function (deploymentEvent, eventName) {
-      if (deploymentEvent.end && !deploymentEvent.start) {
-        deploymentEvent.start = deploymentEvent.end;
-      }
-
-      if (deploymentEvent.start && deploymentEvent.end) {
-        var taskStart = deploymentEvent.start.moment,
-            taskEnd = deploymentEvent.end.moment;
-
-        parent.tasks.push({
-          name: '',
-          classes: 'overview-task',
-          from: taskStart,
-          to: taskEnd
-        });
-
-        data.push({
-          parent: clusterName,
-          name: eventName,
-          id: clusterName + '.' + eventName,
-          tasks: [{
-            name: moment.duration(taskEnd.diff(taskStart)).humanize(),
-            classes: eventName,
-            from: taskStart,
-            to: taskEnd
-          }]
-        });
-      }
-    });
-
-    if (parent.tasks.length) {
-      data.push(parent);
-    }
-
-    try {
-      var startMoment = events[events.length - 1].moment,
-          endMoment = events[0].moment,
-          jobDuration = endMoment.diff(startMoment, 'minutes');
-
-      $scope.ganttScale = Math.ceil(jobDuration / 12) + ' minutes';
-
-      $scope.ganttTimespan = {
-        from: startMoment,
-        to: endMoment
-      };
-    } catch (err) {}
-  }
-
-  $scope.$watch('selected.deployment', function(deployment) {
-    if (_.isUndefined(deployment) || _.isNull(deployment)) {
-      return;
-    }
-
-    // TODO: Remove once node information is in the document.
-    deployment.nodes = getNodes(deployment);
-
-    api.getJobEvents(deployment.metaInfo.jobId).then(function(results) {
-      updateEvents(results.events, deployment.metaInfo.deployer.name);
-      $scope.events = results;
-      $scope.loaded = true;
-    });
-
-    if (deployment.state === 'NEW' || deployment.state === 'STARTED') {
-      $scope.updateInterval = $interval(function () {
-        $scope.refresh();
-      }, 30000);
-    } else if ($scope.updateInterval) {
-      $scope.updateInterval.cancel();
-    }
-  });
-
-  $scope.isPublicACL = function(location) {
-    if (location && location['allowed-acls'].indexOf('public') !== -1) {
-      return true;
-    }
-
-    return false;
-  };
 
   $scope.stopLogs = function() {
     if ($scope.websocket) {
@@ -285,118 +544,9 @@ angular.module('totemDashboard')
     });
   };
 
-  $scope.restoreDeployment = function (deployment) {
-    $scope.working = true;
-    api.restoreDeployment(deployment.deployment.name, deployment.deployment.version, deployment.state, deployment.metaInfo.deployer.url).then(function () {
-      $timeout(function () {
-        $scope.load();
-        $scope.working = false;
-      }, 10000);
-    });
-  };
+}])
 
-  function deleteDeployment (deployment) {
-    $scope.working = true;
-    api.deleteDeployment(deployment.deployment.name, deployment.metaInfo.deployer.url).then(function () {
-      $scope.working = false;
-      $scope.selected.deployment.decomissionStarted = true;
-    });
-  }
-
-  $scope.deleteDialog = function (event, deployment) {
-    var confirm = $mdDialog.confirm()
-          .title('Confirm decommission')
-          .content('Are you sure you want to decommission this deployment?')
-          .ok('No') // Swapping here to make "no" the default
-          .cancel('Yes')
-          .targetEvent(event);
-
-    $mdDialog.show(confirm).catch(function () {
-      deleteDeployment(deployment);
-    });
-  };
-
-  $scope.toggleSidenav = function () {
-    $mdSidenav('left').toggle();
-  };
-
-  $scope.getTiming = function (deployment) {
-    if (!deployment) {
-      return;
-    }
-
-    var stateUpdated;
-
-    if (deployment.stateUpdated) {
-      stateUpdated = deployment.stateUpdated;
-    } else if (deployment['state-updated']) {
-      stateUpdated = moment(deployment['state-updated']);
-    } else {
-      stateUpdated = moment(deployment.modified);
-    }
-
-    var diff = stateUpdated.fromNow(),
-        message;
-
-    switch (deployment.state) {
-      case 'PROMOTED':
-        diff = moment.duration(moment().diff(stateUpdated)).humanize();
-        message = 'up for ' + diff;
-        break;
-      case 'DECOMMISSIONED':
-        message = 'deleted ' + diff;
-        break;
-      case 'FAILED':
-        message = 'failed ' + diff;
-        break;
-      case 'STARTED':
-        message = 'started ' + diff;
-        break;
-      case 'NEW':
-        message = 'created ' + diff;
-        break;
-    }
-
-    return message;
-  };
-
-  $scope.getCommitLink = function (deployment) {
-    try {
-      var gitInfo = deployment.metaInfo.git;
-
-      if (gitInfo.type === 'github') {
-        return 'https://github.com/' + gitInfo.owner + '/' + gitInfo.repo + '/commit/' + gitInfo.commit;
-      }
-    } catch (err) {}
-  };
-
-  $scope.open = function (location) {
-    $window.open('http://' + location.hostname + location.path);
-  };
-
-  $scope.refresh = function () {
-    $scope.load($scope.selected.deployment);
-  };
-
-  $scope.load = function (deployment) {
-    api.getApplication($stateParams.owner, $stateParams.repo, $stateParams.ref).then(function(results) {
-      $scope.application = results;
-      $scope.application.ref = results.refs[$stateParams.ref];
-
-      try {
-        if (deployment) {
-          $scope.selected.deployment = _.findWhere(results.ref.deployments, {id: deployment.id});
-        } else {
-          $scope.selected.deployment = results.ref.deployments[0];
-        }
-      } catch (err) {}
-    }, function(error) {
-      $mdToast.show($mdToast.simple().position('top left').content('Error Getting Application!'));
-      console.error(error);
-    });
-  };
-
-  $scope.load();
+.controller('ApplicationsSelectedDiagnosticContoller', [function() {
 }]);
 
 })();
