@@ -18,9 +18,8 @@ angular.module('totemDashboard')
     });
 }])
 
-.controller('ApplicationsContoller', ['$scope', 'api', function($scope, api) {
+.controller('ApplicationsContoller', ['$state', '$scope', 'api', function($state, $scope, api) {
   $scope.data = {};
-
 
   $scope.sort = {
     predicate: 'id',
@@ -30,6 +29,15 @@ angular.module('totemDashboard')
       $scope.sort.predicate = predicate;
     }
   };
+
+  $scope.changeState = function(eve, owner, repo, ref) {
+    eve.stopPropagation();
+    $state.go('app.applicationsSelected.summary', {
+      owner: owner,
+      repo: repo,
+      ref: ref
+    });
+  }
 
   $scope.load = function() {
     api.listApplications().then(function(results) {
