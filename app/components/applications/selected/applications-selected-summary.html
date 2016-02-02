@@ -5,29 +5,23 @@
         <th class="mdl-data-table__cell--non-numeric">Host</th>
         <th class="mdl-data-table__cell--non-numeric">Path</th>
         <th class="mdl-data-table__cell--non-numeric">Port</th>
-        <th class="mdl-data-table__cell--non-numeric">Privacy</th>
-        <th class="mdl-data-table__cell--non-numeric">Go</th>
+        <th class="mdl-data-table__cell--non-numeric">Access</th>
       </tr>
     </thead>
     <tbody>
       <tr ng-repeat="location in selected.deployment._locations">
-        <td class="mdl-data-table__cell--non-numeric">{{ location.hostname }}</td>
-        <td class="mdl-data-table__cell--non-numeric">{{ location.path }}</td>
-        <td class="mdl-data-table__cell--non-numeric">{{ location.port }}</td>
         <td class="mdl-data-table__cell--non-numeric">
-          <md-button class="mdl-button mdl-js-button">
-            <md-tooltip>
-              {{ location.acls }}
-            </md-tooltip>
-            <md-icon ng-if="location.isPublic" class="material-icons">lock_open</md-icon>
-            <md-icon ng-if="!location.isPublic" class="material-icons">lock</md-icon>
-          </md-button>
+          <a ng-href="{{ location.url }}" target="_blank">{{ location.hostname }}</a>
         </td>
         <td class="mdl-data-table__cell--non-numeric">
-          <a href="{{ location.url }}" target="_blank">
-            <md-button class="mdl-button mdl-js-button">
-              <md-icon class="material-icons">explore</md-icon>
-            </md-button>
+          <a ng-href="{{ location.url }}" target="_blank">{{ location.path }}</a>
+        </td>
+        <td class="mdl-data-table__cell--non-numeric">{{ location.port }}</td>
+        <td class="mdl-data-table__cell--non-numeric">
+          <a>
+            <md-tooltip>{{ location.acls }}</md-tooltip>
+            <md-icon ng-if="location.isPublic" class="material-icons">lock_open</md-icon>
+            <md-icon ng-if="!location.isPublic" class="material-icons">lock</md-icon>
           </a>
         </td>
       </tr>

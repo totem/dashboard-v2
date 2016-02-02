@@ -1,5 +1,10 @@
 <md-content class="md-padding">
   <div layout="row" layout-sm="column">
+    <md-button ng-click="toggleAutoReload()" ng-class="{'md-primary': autoReload, 'md-raised': autoReload}" aria-label="Auto Reload">
+      Auto reload
+    </md-button>
+  </div>
+  <div layout="row" layout-sm="column">
     <div flex>
       <p>Selected Deployment</p>
       <json-formatter ng-if="selected.deployment" json="selected.deployment" open="1"></json-formatter>

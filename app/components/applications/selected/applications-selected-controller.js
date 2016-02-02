@@ -86,7 +86,11 @@ angular.module('totemDashboard')
   };
 
   $scope.events = null;
+
+  // Used for the ref selection menu
+  $scope.refs = [];
   $scope.selected = {
+    tab: 0,
     deployment: null
   };
 
@@ -344,7 +348,9 @@ angular.module('totemDashboard')
           return;
         }
 
-        task.name = moment.duration(task.from.diff(task.to)).humanize();
+        if (task.from && task.to) {
+          task.name = moment.duration(task.from.diff(task.to)).humanize();
+        }
       });
     });
 
@@ -437,6 +443,21 @@ angular.module('totemDashboard')
     } catch (err) {}
   };
 
+ $scope.changeRef = function(newRef) {
+    if (newRef === undefined || newRef === null) {
+      return;
+    }
+
+    if (newRef !== $stateParams.ref) {
+      // Stay in the same state, but change the ref
+      $state.go($state.current.name, {
+        owner: $stateParams.owner,
+        repo: $stateParams.repo,
+        ref: newRef
+      });
+    }
+  }
+
   $scope.refresh = function () {
     $scope.load($scope.selected.deployment);
   };
@@ -449,6 +470,10 @@ angular.module('totemDashboard')
     api.getApplication($stateParams.owner, $stateParams.repo, $stateParams.ref).then(function(results) {
       $scope.application = results;
       $scope.application.ref = results.refs[$stateParams.ref];
+
+      $scope.refs = _.map(results.refs, function(ref, key) {
+        return ref.name;
+      });
 
       try {
         if (deployment) {
@@ -469,10 +494,13 @@ angular.module('totemDashboard')
   $scope.load();
 }])
 
-.controller('ApplicationsSelectedSummaryContoller', [function() {
+.controller('ApplicationsSelectedSummaryContoller', ['$scope', function($scope) {
+  $scope.selected.tab = 0;
 }])
 
 .controller('ApplicationsSelectedLogsContoller', ['$scope', '$stateParams', 'logs', function($scope, $stateParams, logService) {
+  $scope.selected.tab = 1;
+
   $scope.logs = {
     date: '',
     interval: 5,
@@ -546,7 +574,8 @@ angular.module('totemDashboard')
 
 }])
 
-.controller('ApplicationsSelectedDiagnosticContoller', [function() {
+.controller('ApplicationsSelectedDiagnosticContoller', ['$scope', function($scope) {
+  $scope.selected.tab = 2;
 }]);
 
 })();

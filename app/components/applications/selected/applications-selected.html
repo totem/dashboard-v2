@@ -1,44 +1,23 @@
-<md-toolbar class="md-primary md-hue-1">
-  <div class="md-toolbar-tools">
-    <h1><strong>{{ application.owner }} / {{ application.repo }} / {{ application.ref.name }}</strong></h1>
-    <small>&nbsp;(<a ng-href="{{ getCommitLink(selected.deployment) }}" target="_blank"><code>{{ selected.deployment.metaInfo.git.commit | truncate:5 }}</code></a>)</small>
-    <md-button ui-sref-active='md-primary md-raised' ui-sref="app.applicationsSelected.summary">summary</md-button>
-    <md-button ui-sref-active='md-primary md-raised' ui-sref="app.applicationsSelected.logs">logs</md-button>
-    <md-button ui-sref-active='md-primary md-raised' ui-sref="app.applicationsSelected.diagnostic">diagnostic</md-button>
+<md-toolbar class="md-primary md-hue-2">
+  <div class="md-toolbar-tools" >
+      {{ application.owner }} / {{ application.repo }} / &nbsp;
+      <md-menu>
+        <a aria-label="Select a branch" ng-click="$mdOpenMenu($event)">
+          {{ application.ref.name }}
+          <md-icon>arrow_drop_down</md-icon>
+        </a>
+        <md-menu-content width="4">
+          <md-menu-item ng-repeat="ref in refs">
+            <md-button ng-click="changeRef(ref)">{{ ref }}</md-button>
+          </md-menu-item>
+        </md-menu-content>
+      </md-menu>
 
-    <md-button ng-click="toggleAutoReload()" ng-class="{'md-primary': autoReload, 'md-raised': autoReload}" aria-label="Auto Reload">
-      Auto reload
-    </md-button>
+    <small>&nbsp;(<a ng-href="{{ getCommitLink(selected.deployment) }}" target="_blank"><code>{{ selected.deployment.metaInfo.git.commit | truncate:5 }}</code></a>)</small>
 
     <span flex></span>
-    <h2>{{ friendlyState[selected.deployment.state] }} {{ selected.deployment.stateUpdated | humanizeTimeDiff }}</h2>
+    {{ friendlyState[selected.deployment.state] }} {{ selected.deployment.stateUpdated | humanizeTimeDiff }}
   </div>
-
-  <md-fab-speed-dial class="app-dial" md-direction="left" class="md-fling" md-open="fabIsOpen" ng-mouseenter="fabIsOpen = true" ng-mouseleave="fabIsOpen = false">
-    <md-fab-trigger>
-      <md-button class="md-fab">
-        <md-icon class="material-icons">more_horiz</md-icon>
-      </md-button>
-    </md-fab-trigger>
-    <md-fab-actions>
-      <md-button class="md-fab md-primary" ng-click="toggleSidenav()">
-        <md-tooltip>Open deployment menu</md-tooltip>
-        <md-icon class="material-icons">menu</md-icon>
-      </md-button>
-      <md-button class="md-primary md-fab" ng-click="refresh()">
-        <md-tooltip>Update view</md-tooltip>
-        <md-icon class="material-icons">refresh</md-icon>
-      </md-button>
-      <md-button class="md-warn md-fab" ng-click="deleteDialog($event, selected.deployment)" ng-disabled="selected.deployment.state !== 'PROMOTED'">
-        <md-tooltip>Decomission deployment</md-tooltip>
-        <md-icon class="material-icons">delete</md-icon>
-      </md-button>
-      <md-button class="md-warn md-fab" ng-disabled="selected.deployment.state !== 'DECOMMISSIONED' || selected.deployment.state !== 'FAILED'" ng-click="restoreDeployment(selected.deployment)">
-        <md-tooltip>Restore deployment</md-tooltip>
-        <md-icon class="material-icons">restore</md-icon>
-      </md-button>
-    </md-fab-actions>
-  </md-fab-speed-dial>
 </md-toolbar>
 
 <md-toolbar class="md-accent" ng-if="working || !loaded">
@@ -79,6 +58,40 @@
   </md-content>
 </md-sidenav>
 
-<div ng-if="loaded" layout="column" layout-fill>
-  <div ui-view="page"></div>
-</div>
+<md-content class="">
+  <md-tabs md-selected="selected.tab">
+    <md-tab ui-sref="app.applicationsSelected.summary" label="summary"></md-tab>
+    <md-tab ui-sref="app.applicationsSelected.logs" label="logs"></md-tab>
+    <md-tab ui-sref="app.applicationsSelected.diagnostic" label="diagnostic"></md-tab>
+  </md-tabs>
+
+  <div ng-if="loaded" layout="column" layout-fill>
+    <div ui-view="page"></div>
+  </div>
+</md-content>
+
+<md-fab-speed-dial class="app-dial" md-direction="left" class="md-fling" md-open="fabIsOpen" ng-mouseenter="fabIsOpen = true" ng-mouseleave="fabIsOpen = false">
+  <md-fab-trigger>
+    <md-button class="md-fab">
+      <md-icon class="material-icons">more_horiz</md-icon>
+    </md-button>
+  </md-fab-trigger>
+  <md-fab-actions>
+    <md-button class="md-fab md-primary" ng-click="toggleSidenav()">
+      <md-tooltip>Open deployment menu</md-tooltip>
+      <md-icon class="material-icons">menu</md-icon>
+    </md-button>
+    <md-button class="md-primary md-fab" ng-click="refresh()">
+      <md-tooltip>Update view</md-tooltip>
+      <md-icon class="material-icons">refresh</md-icon>
+    </md-button>
+    <md-button class="md-warn md-fab" ng-click="deleteDialog($event, selected.deployment)" ng-disabled="selected.deployment.state !== 'PROMOTED'">
+      <md-tooltip>Decomission deployment</md-tooltip>
+      <md-icon class="material-icons">delete</md-icon>
+    </md-button>
+    <md-button class="md-warn md-fab" ng-disabled="selected.deployment.state !== 'DECOMMISSIONED' || selected.deployment.state !== 'FAILED'" ng-click="restoreDeployment(selected.deployment)">
+      <md-tooltip>Restore deployment</md-tooltip>
+      <md-icon class="material-icons">restore</md-icon>
+    </md-button>
+  </md-fab-actions>
+</md-fab-speed-dial>
