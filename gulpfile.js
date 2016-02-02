@@ -44,7 +44,8 @@ opts.inject = {
     'app/bower/angular-material/angular-material.js',
     'app/bower/elasticsearch/elasticsearch.angular.js',
     'app/bower/json-formatter/dist/json-formatter.js',
-    'app/bower/DateJS/build/production/date.min.js'
+    'app/bower/DateJS/build/production/date.min.js',
+    'app/bower/angular-loading-bar/build/loading-bar.min.js'
   ],
   app: [
     'app/app.js',

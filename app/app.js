@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('totemDashboard', ['ngAnimate', 'ngSanitize', 'ngMessages', 'ngMaterial', 'ngWebSocket', 'ui.router', 'elasticsearch', 'jsonFormatter', 'gantt', 'gantt.tree', 'gantt.table', 'gantt.groups', 'gantt.tooltips'])
+angular.module('totemDashboard', ['angular-loading-bar', 'ngAnimate', 'ngSanitize', 'ngMessages', 'ngMaterial', 'ngWebSocket', 'ui.router', 'elasticsearch', 'jsonFormatter', 'gantt', 'gantt.tree', 'gantt.table', 'gantt.groups', 'gantt.tooltips'])
   .config(function ($urlRouterProvider) {
     $urlRouterProvider.when('', '/apps');
   })
@@ -9,4 +9,7 @@ angular.module('totemDashboard', ['ngAnimate', 'ngSanitize', 'ngMessages', 'ngMa
       .primaryPalette('blue-grey')
       .accentPalette('orange');
   })
+  .config(['cfpLoadingBarProvider', function(cfpLoadingBarProvider) {
+    cfpLoadingBarProvider.includeSpinner = false;
+  }])
 ;
