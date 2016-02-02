@@ -30,6 +30,10 @@ angular.module('totemDashboard')
 }])
 
 .service('ImageFactory', ['$q', '$http', 'config', function($q, $http, config) {
+  this.stages = function() {
+    return ['clone', 'checkout', 'build', 'push'];
+  };
+
   this.job = function(jobId) {
     var deferred = $q.defer();
 
@@ -54,7 +58,12 @@ angular.module('totemDashboard')
     }).then(function successCallback(response) {
         _.each(response.data, function(job) {
           job.startMoment = moment(job.startTime);
-          job.endMoment = moment(job.endTime);
+
+          if (job.endTime) {
+            job.endMoment = moment(job.endTime);
+            job.duration = moment.duration(job.endMoment.diff(job.startMoment));
+          }
+
           job.repositoryDetails = job.context.owner + '/' + job.context.repo + '/' + job.context.branch;
         });
 
@@ -85,9 +94,23 @@ angular.module('totemDashboard')
 .controller('ImageFactoryController', ['$state', '$scope', 'ImageFactory', function($state, $scope, ImageFactory) {
   $scope.data = {};
 
-  $scope.limitCount = 20;
   $scope.predicate = 'startMoment';
   $scope.reverse = true;
+
+  $scope.page = {
+    current: 1,
+    begin: 0,
+    size: 20,
+    total: 1,
+    change: function() {
+      $scope.page.begin = ($scope.page.current - 1) * $scope.page.size;
+      $scope.page.total = ($scope.data.jobs) ? Math.ceil($scope.data.jobs.length / $scope.page.size) : 1;
+    },
+    reset: function() {
+      $scope.page.current = 1;
+      $scope.page.change();
+    }
+  };
 
   $scope.selectJob = function(job) {
     $state.go('app.image-factory-selected', {job: job.id});
@@ -96,6 +119,7 @@ angular.module('totemDashboard')
   $scope.load = function() {
     ImageFactory.list().then(function imageFactoryListSuccess(data) {
       $scope.data.jobs = data;
+      $scope.page.reset();
     });
   };
 
@@ -104,11 +128,21 @@ angular.module('totemDashboard')
 
 .controller('ImageFactorySelectedController', ['$scope', '$state', 'ImageFactory', function($scope, $state, ImageFactory) {
   $scope.data = {};
+  $scope.stages = ImageFactory.stages();
 
   $scope.load = function() {
     ImageFactory.job($state.params.job).then(function imageFactoryJobSuccess(data) {
       data.startMoment = moment(data.startTime);
-      data.endMoment = moment(data.endTime);
+
+      if (data.endTime) {
+        data.endMoment = moment(data.endTime);
+        data.duration = moment.duration(data.endMoment.diff(data.startMoment));
+      }
+
+      // Add a quay link to the tags page
+      if (data.image && data.image.indexOf('quay.io') >= 0) {
+        data.imageLink = 'https://' + data.image.split(':')[0] + '?tag=latest&tab=tags';
+      }
 
       $scope.job = data;
     });

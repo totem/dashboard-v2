@@ -147,6 +147,28 @@ md-card.totem-app {
   }
 }
 
+.spaced-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  td {
+    padding: 4px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+  }
+
+  td:first-child {
+    padding-left: 10px;
+  }
+}
+
+.message-warn {
+  color: rgb(255,87,34);
+}
+
+.shifted-down {
+  margin-top: 20px;
+}
+
 #loading-bar .bar {
   height: 3px;
   background: rgb(255,87,34);

@@ -20,6 +20,10 @@ angular.module('totemDashboard')
         return '';
       }
 
+      if (moment.isDuration(when)) {
+        return when.humanize();
+      }
+
       return moment.duration(moment().diff(when)).humanize();
     };
   })
