@@ -216,8 +216,8 @@ gulp.task('test:e2e:debug', ['webdriver', 'serve:test'], function () {
 
 gulp.task('livereload', function() {
   gulp.watch(paths.sass.src, ['build']);
-  gulp.watch(['app/**/*.html'], ['build']);
-  gulp.watch(['app/**/*.js'], ['build']);
+  gulp.watch(['app/**/*.html', '!app/bower/**/*'], ['build']);
+  gulp.watch(['app/**/*.js', '!app/bower/**/*'], ['build']);
 });
 
 gulp.task('serve', function() {
