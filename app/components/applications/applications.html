@@ -15,8 +15,27 @@
     </md-input-container>
   </div>
 
+  <div>
+    sort by
+
+    <md-button ng-click="sort.change('id')" ng-class="{'md-raised': sort.predicate === 'id'}">owner & repo
+      <md-icon ng-if='sort.predicate === "id" && !sort.reverse' class="material-icons">arrow_drop_up</md-icon>
+      <md-icon ng-if='sort.predicate === "id" && sort.reverse' class="material-icons">arrow_drop_down</md-icon>
+    </md-button>
+
+    <md-button ng-click="sort.change('owner')" ng-class="{'md-raised': sort.predicate === 'owner'}">owner
+      <md-icon ng-if='sort.predicate === "owner" && !sort.reverse' class="material-icons">arrow_drop_up</md-icon>
+      <md-icon ng-if='sort.predicate === "owner" && sort.reverse' class="material-icons">arrow_drop_down</md-icon>
+    </md-button>
+
+    <md-button ng-click="sort.change('repo')" ng-class="{'md-raised': sort.predicate === 'repo'}">repo
+      <md-icon ng-if='sort.predicate === "repo" && !sort.reverse' class="material-icons">arrow_drop_up</md-icon>
+      <md-icon ng-if='sort.predicate === "repo" && sort.reverse' class="material-icons">arrow_drop_down</md-icon>
+    </md-button>
+  </div>
+
   <div layout="row" layout-wrap>
-    <div flex="25" ng-repeat="app in data.applications | filter:search:strict">
+    <div flex="25" ng-repeat="app in data.applications | filter:search:strict | orderBy:sort.predicate:sort.reverse">
       <md-card class="totem-app" ui-sref='app.applicationsSelected.summary({owner: app.owner, repo: app.repo, ref: "develop"})'>
         <md-card-title>
           <span class="md-headline">{{ app.repo }}</span>

@@ -21,6 +21,16 @@ angular.module('totemDashboard')
 .controller('ApplicationsContoller', ['$scope', 'api', function($scope, api) {
   $scope.data = {};
 
+
+  $scope.sort = {
+    predicate: 'id',
+    reverse: false,
+    change: function(predicate) {
+      $scope.sort.reverse = ($scope.sort.predicate === predicate) ? !$scope.sort.reverse : false;
+      $scope.sort.predicate = predicate;
+    }
+  };
+
   $scope.load = function() {
     api.listApplications().then(function(results) {
       $scope.data.applications = results;
