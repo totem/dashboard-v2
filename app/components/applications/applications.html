@@ -38,17 +38,17 @@
 
   <div layout="row" layout-wrap>
     <div flex="25" ng-repeat="app in data.applications | filter:search:strict | orderBy:sort.predicate:sort.reverse">
-      <md-card class="totem-app" ng-click="changeState($event, app.owner, app.repo, 'develop')">
+      <md-card class="totem-app" ng-click="changeState($event, app)">
         <md-card-title>
           <span class="md-headline">{{ app.repo }}</span>
           <span class="md-subhead">{{ app.owner }}</span>
         </md-card-title>
 
         <md-card-actions layout="row" layout-align="end center">
-          <md-button ng-if="app.refs.master" ng-click="changeState($event, app.owner, app.repo, 'master')">
+          <md-button ng-if="app.refs.master" ng-click="changeState($event, app, 'master')">
             master
           </md-button>
-          <md-button ng-if="app.refs.develop" class="md-primary" ng-click="changeState($event, app.owner, app.repo, 'develop')">
+          <md-button ng-if="app.refs.develop" class="md-primary" ng-click="changeState($event, app, 'develop')">
             develop
           </md-button>
         </md-card-actions>

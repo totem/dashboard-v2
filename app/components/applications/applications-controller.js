@@ -48,11 +48,20 @@ angular.module('totemDashboard')
       }
     });
 
-  $scope.changeState = function(eve, owner, repo, ref) {
+  $scope.changeState = function(eve, app, ref) {
+    if (!ref) {
+      ref = 'develop';
+
+      // if there's no develop, check for master
+      if (app.refs && (!app.refs.develop && app.refs.master)) {
+        ref = 'master';
+      }
+    }
+
     eve.stopPropagation();
     $state.go('app.applicationsSelected.summary', {
-      owner: owner,
-      repo: repo,
+      owner: app.owner,
+      repo: app.repo,
       ref: ref
     });
   };
