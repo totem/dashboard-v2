@@ -2,7 +2,7 @@
 'use strict';
 
 /*jshint strict: true */
-/*globals angular*/
+/*globals angular,$*/
 
 angular.module('totemDashboard')
 .config(['$stateProvider', function($stateProvider) {
@@ -18,7 +18,7 @@ angular.module('totemDashboard')
     });
 }])
 
-.controller('ApplicationsContoller', ['$state', '$scope', 'api', function($state, $scope, api) {
+.controller('ApplicationsContoller', ['$state', '$scope', 'hotkeys', 'api', function($state, $scope, hotkeys, api) {
   $scope.data = {};
 
   $scope.sort = {
@@ -30,6 +30,24 @@ angular.module('totemDashboard')
     }
   };
 
+  hotkeys.bindTo($scope)
+    .add({
+      combo: '/',
+      description: 'filter',
+      callback: function(event) {
+        event.preventDefault();
+        $('.searchAll').focus();
+      }
+    })
+    .add({
+      combo: 'esc',
+      allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],
+      callback: function(event) {
+        event.preventDefault();
+        $(event.srcElement).blur();
+      }
+    });
+
   $scope.changeState = function(eve, owner, repo, ref) {
     eve.stopPropagation();
     $state.go('app.applicationsSelected.summary', {
@@ -37,7 +55,7 @@ angular.module('totemDashboard')
       repo: repo,
       ref: ref
     });
-  }
+  };
 
   $scope.load = function() {
     api.listApplications().then(function(results) {

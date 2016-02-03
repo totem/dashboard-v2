@@ -45,7 +45,8 @@ opts.inject = {
     'app/bower/elasticsearch/elasticsearch.angular.js',
     'app/bower/json-formatter/dist/json-formatter.js',
     'app/bower/DateJS/build/production/date.min.js',
-    'app/bower/angular-loading-bar/build/loading-bar.min.js'
+    'app/bower/angular-loading-bar/build/loading-bar.min.js',
+    'app/bower/angular-hotkeys/build/hotkeys.min.js'
   ],
   app: [
     'app/app.js',

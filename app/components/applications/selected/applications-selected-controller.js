@@ -456,7 +456,7 @@ angular.module('totemDashboard')
         ref: newRef
       });
     }
-  }
+  };
 
   $scope.refresh = function () {
     $scope.load($scope.selected.deployment);
@@ -471,7 +471,7 @@ angular.module('totemDashboard')
       $scope.application = results;
       $scope.application.ref = results.refs[$stateParams.ref];
 
-      $scope.refs = _.map(results.refs, function(ref, key) {
+      $scope.refs = _.map(results.refs, function(ref) {
         return ref.name;
       });
 

@@ -2,7 +2,7 @@
 'use strict';
 
 /*jshint strict: true */
-/*globals angular,moment,_*/
+/*globals angular,moment,_,$*/
 
 angular.module('totemDashboard')
 .config(['$stateProvider', function($stateProvider) {
@@ -91,7 +91,47 @@ angular.module('totemDashboard')
   };
 }])
 
-.controller('ImageFactoryController', ['$state', '$scope', 'ImageFactory', function($state, $scope, ImageFactory) {
+.controller('ImageFactoryController', ['$state', '$scope', 'hotkeys', 'ImageFactory', function($state, $scope, hotkeys, ImageFactory) {
+
+  hotkeys.bindTo($scope)
+    .add({
+      combo: 'r',
+      description: 'reload',
+      callback: function() {
+        $scope.load();
+      }
+    })
+    .add({
+      combo: '/',
+      description: 'filter',
+      callback: function(event) {
+        event.preventDefault();
+        $('.searchRepo').focus();
+      }
+    })
+    .add({
+      combo: 'esc',
+      allowIn: ['INPUT', 'SELECT', 'TEXTAREA'],
+      callback: function(event) {
+        event.preventDefault();
+        $(event.srcElement).blur();
+      }
+    })
+    .add({
+      combo: 'n',
+      description: 'Next page',
+      callback: function() {
+        $scope.page.set(1);
+      }
+    })
+    .add({
+      combo: 'p',
+      description: 'Previous page',
+      callback: function() {
+        $scope.page.set(-1);
+      }
+    });
+
   $scope.data = {};
 
   $scope.predicate = 'startMoment';
@@ -106,8 +146,8 @@ angular.module('totemDashboard')
       $scope.page.begin = ($scope.page.current - 1) * $scope.page.size;
       $scope.page.total = ($scope.data.jobs) ? Math.ceil($scope.data.jobs.length / $scope.page.size) : 1;
     },
-    reset: function() {
-      $scope.page.current = 1;
+    set: function(adjust) {
+      $scope.page.current = (adjust) ? $scope.page.current + adjust : 1;
       $scope.page.change();
     }
   };
@@ -119,16 +159,32 @@ angular.module('totemDashboard')
   $scope.load = function() {
     ImageFactory.list().then(function imageFactoryListSuccess(data) {
       $scope.data.jobs = data;
-      $scope.page.reset();
+      $scope.page.set();
     });
   };
 
   $scope.load();
 }])
 
-.controller('ImageFactorySelectedController', ['$scope', '$state', 'ImageFactory', function($scope, $state, ImageFactory) {
+.controller('ImageFactorySelectedController', ['$scope', '$state', 'hotkeys', 'ImageFactory', function($scope, $state, hotkeys, ImageFactory) {
   $scope.data = {};
   $scope.stages = ImageFactory.stages();
+
+  hotkeys.bindTo($scope)
+    .add({
+      combo: 'r',
+      description: 'reload',
+      callback: function() {
+        $scope.load();
+      }
+    })
+    .add({
+      combo: 'R',
+      description: 'reload logs',
+      callback: function() {
+        $scope.loadLogs();
+      }
+    });
 
   $scope.load = function() {
     ImageFactory.job($state.params.job).then(function imageFactoryJobSuccess(data) {

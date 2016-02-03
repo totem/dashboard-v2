@@ -1,8 +1,9 @@
 <div class="md-padding">
   <div layout layout-sm="column">
+    <form>
     <md-input-container flex>
       <md-icon class="material-icons">search</md-icon>
-      <input ng-model="search.$" type="text" placeholder="any field">
+      <input class="searchAll" ng-model="search.$" type="text" placeholder="any field">
     </md-input-container>
     <md-input-container flex>
       <input ng-model="search.owner" type="text" placeholder="owner">
@@ -13,6 +14,7 @@
     <md-input-container flex>
       <input ng-model="search.refs" type="text" placeholder="ref">
     </md-input-container>
+    </form>
   </div>
 
   <div>
