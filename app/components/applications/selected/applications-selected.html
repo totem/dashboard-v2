@@ -2,7 +2,7 @@
   <div class="md-toolbar-tools" >
       {{ application.owner }} / {{ application.repo }} / &nbsp;
       <md-menu>
-        <a aria-label="Select a branch" ng-click="$mdOpenMenu($event)">
+        <a aria-label="Select a branch" ng-click="$mdOpenMenu($event)" class="branch-menu">
           {{ application.ref.name }}
           <md-icon>arrow_drop_down</md-icon>
         </a>

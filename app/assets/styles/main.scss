@@ -129,10 +129,16 @@ tr[role=button] {
 }
 
 md-card.totem-app {
+  cursor: pointer;
+
   md-card-title {
     -webkit-flex-direction: column;
     flex-direction: column;
   }
+}
+
+.branch-menu {
+  cursor: pointer;
 }
 
 .spaced-table {
