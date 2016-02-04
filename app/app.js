@@ -12,4 +12,20 @@ angular.module('totemDashboard', ['angular-loading-bar', 'ngAnimate', 'ngSanitiz
   .config(['cfpLoadingBarProvider', function(cfpLoadingBarProvider) {
     cfpLoadingBarProvider.includeSpinner = false;
   }])
+  .run(['$rootScope', '$log', '$mdDialog', function($rootScope, $log, $mdDialog) {
+    $rootScope.$on('$stateChangeError', function (event, toState, toParams, fromState, fromParams, error) {
+      $log.error('$stateChangeError', event, toState, toParams, fromState, fromParams, error);
+
+      $mdDialog.show(
+        $mdDialog.alert()
+          .clickOutsideToClose(true)
+          .title('Error!')
+          .textContent(error)
+          .ariaLabel('Application Error Alert')
+          .ok('Ok')
+          .targetEvent(event)
+      );
+    });
+
+  }])
 ;
