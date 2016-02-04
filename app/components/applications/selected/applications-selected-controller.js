@@ -398,6 +398,18 @@ angular.module('totemDashboard')
     $scope.selected.deployment = deployment;
   }
 
+  $scope.isRestoreDisabled = function(deployment) {
+    if (!deployment || !deployment.state) {
+      return true;
+    }
+
+    if (deployment.state === 'DECOMMISSIONED' || deployment.state === 'FAILED') {
+      return false;
+    }
+
+    return true;
+  };
+
   $scope.restoreDeployment = function (deployment) {
     $scope.working = true;
     api.restoreDeployment(deployment.deployment.name, deployment.deployment.version, deployment.state, deployment.metaInfo.deployer.url).then(function () {

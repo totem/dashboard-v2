@@ -86,10 +86,10 @@
       <md-icon class="material-icons">refresh</md-icon>
     </md-button>
     <md-button class="md-warn md-fab" ng-click="deleteDialog($event, selected.deployment)" ng-disabled="selected.deployment.state !== 'PROMOTED'">
-      <md-tooltip>Decomission deployment</md-tooltip>
+      <md-tooltip>Decommission deployment</md-tooltip>
       <md-icon class="material-icons">delete</md-icon>
     </md-button>
-    <md-button class="md-warn md-fab" ng-disabled="selected.deployment.state !== 'DECOMMISSIONED' || selected.deployment.state !== 'FAILED'" ng-click="restoreDeployment(selected.deployment)">
+    <md-button class="md-warn md-fab" ng-disabled="isRestoreDisabled(selected.deployment)" ng-click="restoreDeployment(selected.deployment)">
       <md-tooltip>Restore deployment</md-tooltip>
       <md-icon class="material-icons">restore</md-icon>
     </md-button>
