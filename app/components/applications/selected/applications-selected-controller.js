@@ -245,13 +245,6 @@ angular.module('totemDashboard')
   function _eventsByPhase(events) {
     /*
     Group the events into meaningful phases.
-
-    Build: _START_ till DEPLOY_REQUESTED
-    Deployment:
-      Prep: NEW_DEPLOYMENT till UPSTREAMS_REGISTERED
-      Pull: "UNITS_ADDED" till "NODES_DISCOVERED"
-      Deploy: "UNITS_DEPLOYED" till "WIRED"
-    Cleanup: "WIRED" till "PROMOTED"
     */
     function gen(name, classes, opts) {
       if (_.isUndefined(classes) || _.isNull(classes)) {
@@ -276,10 +269,10 @@ angular.module('totemDashboard')
     // Can be moved to configuration and generated.
     var phases = [
       gen('Build'), // 0
-      gen('Deployment', 'overview-task', {children: ['Prep', 'Pull', 'Run']}),
-      gen('Prep'), // 2
-      gen('Pull'), // 3
-      gen('Run'), // 4
+      gen('Deployment', 'overview-task', {children: ['Start', 'Prewire Check', 'Wired']}),
+      gen('Start'), // 2
+      gen('Prewire Check'), // 3
+      gen('Wired'), // 4
       gen('Cleanup') // 5
     ];
 
@@ -291,11 +284,11 @@ angular.module('totemDashboard')
         next: function() { return phases[2].tasks[0]; },
         parent: function() { return phases[1].tasks[0]; }
       },
-      'UPSTREAMS_REGISTERED': {
+      'NODES_DISCOVERED': {
         next: function() { return phases[3].tasks[0]; },
         parent: function() { return phases[1].tasks[0]; }
       },
-      'NODES_DISCOVERED': {
+      'DEPLOYMENT_CHECK_PASSED': {
         next: function() { return phases[4].tasks[0]; },
         parent: function() { return phases[1].tasks[0]; }
       },
@@ -315,14 +308,14 @@ angular.module('totemDashboard')
     _.each(events, function(eve) {
       if (currentPhase) {
         // accounts for the start of the cycle
-        if (!currentPhase.to) {
-          currentPhase.to = eve.moment;
+        if (!currentPhase.from) {
+          currentPhase.from = eve.moment;
         }
 
-        currentPhase.from = eve.moment;
+        currentPhase.to = eve.moment;
 
         if (currentParent) {
-          currentParent.from = eve.moment;
+          currentParent.to = eve.moment;
         }
       }
 
@@ -332,12 +325,12 @@ angular.module('totemDashboard')
         currentParent = endPhases[eve.type].parent();
 
         // TODO: This shouldn't need to be done here, should be caught above.
-        if (currentPhase) {
-          currentPhase.to = eve.moment;
+        if (currentPhase && !currentPhase.from) {
+          currentPhase.from = eve.moment;
         }
 
-        if (currentParent && !currentParent.to) {
-          currentParent.to = eve.moment;
+        if (currentParent && !currentParent.from) {
+          currentParent.from = eve.moment;
         }
       }
     });
