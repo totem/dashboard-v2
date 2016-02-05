@@ -82,7 +82,8 @@ angular.module('totemDashboard')
   $scope.ganttOptions = {
     from: null,
     to: null,
-    scale: null
+    scale: 'minute',
+    headers: ['day', 'minute']
   };
 
   $scope.events = null;
@@ -342,17 +343,32 @@ angular.module('totemDashboard')
     });
 
     // for each task in each phase, set the name to the duration if the name isn't set.
-    _.each(phases, function(phase) {
-      _.each(phase.tasks, function(task) {
-        if (task.name !== null) {
-          return;
+    // remove any incomplete tasks and phases.
+    phases = _.reduce(phases, function(acc, phase) {
+      phase.tasks = _.reduce(phase.tasks, function(acc, task) {
+        // Only set the name if it isn't already set.
+        if (task.name === null) {
+          if (task.from && task.to) {
+            task.name = moment.duration(task.from.diff(task.to)).humanize();
+          } else if (task.to) {
+            // When the task is still in progress
+            task.name = 'for ' + moment.duration(moment().diff(task.to)).humanize();
+          }
         }
 
-        if (task.from && task.to) {
-          task.name = moment.duration(task.from.diff(task.to)).humanize();
+        if (task.to) {
+          acc.push(task);
         }
-      });
-    });
+
+        return acc;
+      }, []);
+
+      if (phase.tasks.length > 0) {
+        acc.push(phase);
+      }
+
+      return acc;
+    }, []);
 
     return phases;
   }
@@ -361,7 +377,14 @@ angular.module('totemDashboard')
     // Size the gantt for the short time frame
     $scope.ganttOptions.from = _.first(events).moment;
     $scope.ganttOptions.to = _.last(events).moment;
-    $scope.ganttOptions.scale = Math.ceil($scope.ganttOptions.to.diff($scope.ganttOptions.from, 'minutes') / 12) + ' minutes';
+
+    var difference = $scope.ganttOptions.to - $scope.ganttOptions.from;
+
+    // Change scale to hours if the deploy took at least 45 minutes (in millis)
+    if (difference > (45 * 60 * 1000)) {
+      $scope.ganttOptions.scale = '1 hour';
+      $scope.ganttOptions.headers[1] = 'hour';
+    }
 
     if (raw === true) {
       $scope.events = _eventsRaw(events);

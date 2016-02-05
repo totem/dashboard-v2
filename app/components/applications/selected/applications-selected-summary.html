@@ -31,7 +31,7 @@
   <div flex ng-if="events">
     <h3>Events</h3>
 
-    <div gantt data="events" view-scale="ganttOptions.scale" from-date="ganttOptions.from" to-date="ganttOptions.to" headers="['day', 'minute']">
+    <div gantt data="events" view-scale="ganttOptions.scale" from-date="ganttOptions.from" to-date="ganttOptions.to" headers="ganttOptions.headers">
       <gantt-tree templateUrl="'/components/angular-gantt/plugins/tree/treeBodyChildren.tmpl.html'"></gantt-tree>
     </div>
   </div>
