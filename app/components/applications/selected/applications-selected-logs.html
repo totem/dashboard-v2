@@ -1,0 +1,36 @@
+<md-button class="follow-logs-button md-fab md-primary" ng-click="logs.scroll = !logs.scroll">
+  <md-tooltip md-direction="top">Follow logs</md-tooltip>
+  <md-icon ng-if="logs.scroll" class="material-icons">visibility</md-icon>
+  <md-icon ng-if="!logs.scroll" class="material-icons">visibility_off</md-icon>
+</md-button>
+
+<md-content class="md-padding">
+  <md-subheader>
+    <md-button class="md-raised" ng-class="{'md-primary': !logs.running}" ng-disabled="logs.running" ng-click="startLogs()">
+      <md-icon class="material-icons">play_arrow</md-icon>
+    </md-button>
+    <md-button class="md-raised" ng-class="{'md-warn': logs.running}" ng-disabled="!logs.running" ng-click="stopLogs()">
+      <md-icon class="material-icons">stop</md-icon>
+    </md-button>
+    <md-button class="md-raised" ng-disabled="!logs.messages.length" ng-click="logs.messages.length = 0">
+      <md-icon class="material-icons">delete</md-icon>
+    </md-button>
+    <md-button class="md-raised" ng-click="logs.showTimestamp = !logs.showTimestamp" ng-class="{'md-primary': logs.showTimestamp}">
+      Show Timestamps
+    </md-button>
+    {{logs.status.description}}
+  </md-subheader>
+  <div layout layout-sm="column" class="log-controls">
+    <md-input-container md-no-float flex>
+      <md-icon class="material-icons datetime">access_time</md-icon>
+      <input humandate ng-model="logs.date" type="text" placeholder="How long to look back, empty is now, -30 mins is valid">
+    </md-input-container>
+    <md-input-container md-no-float flex>
+      <md-icon class="material-icons">search</md-icon>
+      <input ng-model="logs.filter.$" type="text" placeholder="Filter">
+    </md-input-container>
+  </div>
+  <div class="log-messages" id="log-messages">
+    <div ng-repeat="line in logs.messages | filter:logs.filter:strict"><span ng-if="logs.showTimestamp" class="timestamp">{{ line.date.format('MMM Do h:mm:ss a') }}</span> {{ line.message }}</div>
+  </div>
+</md-content>

@@ -1,15 +1,17 @@
 <md-toolbar>
   <div class="md-toolbar-tools">
-    <h2 ui-sref="app.applications">totem</h2>
+    <a class="toolbar-logo" ui-sref="app.applications">
+      <img alt="totem" src="/img/logo.png">
+    </a>
 
     <span flex></span>
 
-    <md-button ui-sref="app.image-factory">
-      Image factory
+    <md-button ui-sref="app.applications">
+      apps
     </md-button>
 
-    <md-button class="md-icon-button" aria-label="Favorite" ui-sref="app.applications">
-      <md-icon aria-label="apps" style="color: greenyellow;" class="material-icons">apps</md-icon>
+    <md-button ui-sref="app.image-factory">
+      Image factory
     </md-button>
   </div>
 </md-toolbar>

@@ -1,0 +1,29 @@
+<md-content class="md-padding">
+  <div layout="row" layout-sm="column">
+    <md-button ng-click="toggleAutoReload()" ng-class="{'md-primary': autoReload, 'md-raised': autoReload}" aria-label="Auto Reload">
+      Auto reload
+    </md-button>
+  </div>
+  <div layout="row" layout-sm="column">
+    <div flex>
+      <p>Selected Deployment</p>
+      <json-formatter ng-if="selected.deployment" json="selected.deployment" open="1"></json-formatter>
+    </div>
+    <div flex>
+      <p>Application</p>
+      <json-formatter ng-if="application" json="application" open="1"></json-formatter>
+    </div>
+    <div flex>
+      <md-list ng-if="diagnostic.events">
+        <md-subheader class="md-no-sticky">Events</md-subheader>
+        <md-list-item class="md-3-line" ng-repeat="event in diagnostic.events">
+          <div class="md-list-item-text">
+            <h3>{{ event.type | lowercase }}</h3>
+            <h4>{{ event.component }}</h4>
+            <p>{{ event.date }} <json-formatter json="event"></json-formatter></p>
+          </div>
+        </md-list-item>
+      </md-list>
+    </div>
+  </div>
+</md-content>
