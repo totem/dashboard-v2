@@ -92,107 +92,103 @@ angular.module('totemDashboard')
       return item;
     }
 
-    function getApplicationParent(item, results) {
-      var applicationId = item.metaInfo.git.owner + '-' + item.metaInfo.git.repo;
-      if (!(applicationId in results)) {
-        results[applicationId] = {
-          id: applicationId,
-          owner: item.metaInfo.git.owner,
-          repo: item.metaInfo.git.repo,
-          refs: {}
-        };
+    this.listApplications = function(options) {
+      options = options || {
+        refs: null
+      };
+
+      var filteredRefs = options.refs || ['develop', 'master'];
+
+      if (!_.isArray(filteredRefs) && _.isString(filteredRefs)) {
+        filteredRefs = filteredRefs.split(',');
       }
 
-      if (!(item.metaInfo.git.ref in results[applicationId].refs)) {
-        results[applicationId].refs[item.metaInfo.git.ref] = {
-          ref: item.metaInfo.git.ref,
-          state: null,
-          deployments: []
-        };
-      }
-
-      return results[applicationId];
-    }
-
-    this.listApplications = function() {
-      /**
-        Get a list of all applications. Group them by owner and repo
-
-        Response Model
-        {
-          applications: [
-            {
-              id: "{owner}-{repo}",
-              owner: "{owner}",
-              repo: "{repo}",
-              refs: {
-                {ref}: {
-                  ref: "{ref}",
-                  state: "PROMOTED|FAILED|",
-                  deployments: []
-                }
-              }
-            }
-          ]
-        }
-      **/
-      var esClient = client.get();
+      var es = client.get();
 
       var deferred = deferred || $q.defer(),
           promise = deferred.promise;
 
-      var hits = [];
-
       var body = {
+        size: 1,
         query: {
-          'match_all': {}
+          filtered: {
+            filter: {
+              bool: {
+                must: [{
+                  terms: {
+                    'meta-info.git.ref': filteredRefs
+                  }
+                }]
+              }
+            }
+          }
+        },
+        aggregations: {
+          owner: {
+            terms: {
+              field: 'meta-info.git.owner',
+              size: 0
+            },
+            aggregations: {
+              repo: {
+                terms: {
+                  field: 'meta-info.git.repo',
+                  size: 0
+                },
+                aggregations: {
+                  ref: {
+                    terms: {
+                      field: 'meta-info.git.ref',
+                      size: 0
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
       };
 
-      esClient.search({
+      es.search({
         index: config.elasticsearch.index,
         type: 'deployments',
-        scroll: '30s',
-        size: 1000,
         body: body
-      }, function getMoreUntilDone(error, response) {
-        if (error) {
-          deferred.reject(error);
-        }
+      }).then(function(response) {
+        /*
+          Returns an Array of
+          {
+            id: 'owner-repo',
+            owner: 'owner',
+            repo: 'repo',
+            refs: {
+              'ref': 'ref'
+            }
+          }
+        */
+        var applications = _.reduce(response.aggregations.owner.buckets, function(apps, owner) {
+          _.each(owner.repo.buckets, function(repo) {
+            // Build an "app" that's composed of the owner, repo, and branches.
+            apps.push({
+              id: [owner.key, repo.key].join('-'),
+              owner: owner.key,
+              repo: repo.key,
+              refs: _.reduce(repo.ref.buckets, function(acc, ref) {
+                acc[ref.key] = {
+                  ref: ref.key,
+                  count: ref.doc_count
+                };
 
-        _.each(response.hits.hits, function(hit) {
-          hits.push(hit._source);
-        });
+                return acc;
+              }, {})
+            });
+          });
 
-        if (response.hits.total !== hits.length) {
-          esClient.scroll({
-            scrollId: response._scroll_id,
-            scroll: '30s'
-          }, getMoreUntilDone);
-        } else {
-          // All results are in the hits array.
-          var applications = _.chain(hits)
-            .map(transformDeploymentHit)  // transform some of the variables to camelCase
-            .map(transformProxyData)  // transform the proxy information into meaningful data
-            .sortBy('startedAt')
-            .reverse()
-            .reduce(function(results, item) {  // build a map of "{owner}-{repo}" from the deployments to group them
-              var parent = getApplicationParent(item, results);
-              var ref = item.metaInfo.git.ref;
+          return apps;
+        }, []);
 
-              parent.refs[ref].deployments.push(item);
-
-              if (!parent.refs[ref].state) {
-                parent.refs[ref].state = item.state;
-              }
-
-              return results;
-            }, {})
-            .map()  // flatten the map into an array
-            .value();
-
-          deferred.resolve(applications);
-        }
+        deferred.resolve(applications);
+      }, function(err) {
+        deferred.reject(err);
       });
 
       return promise;
@@ -216,19 +212,20 @@ angular.module('totemDashboard')
 
       var body = {
         query: {
-          'match_all': {}
-        },
-        filter: {
-          bool: {
-            must: [{
-              term: {
-                owner: owner
+          filtered: {
+            filter: {
+              bool: {
+                must: [{
+                  term: {
+                    owner: owner
+                  }
+                }, {
+                  term: {
+                    repo: repo
+                  }
+                }]
               }
-            }, {
-              term: {
-                repo: repo
-              }
-            }]
+            }
           }
         }
       };
@@ -321,15 +318,16 @@ angular.module('totemDashboard')
 
       var body = {
         query: {
-          'match_all': {}
-        },
-        filter: {
-          bool: {
-            must: [{
-              term: {
-                'meta-info.job-id': jobId
+          filtered: {
+            filter: {
+              bool: {
+                must: [{
+                  term: {
+                    'meta-info.job-id': jobId
+                  }
+                }]
               }
-            }]
+            }
           }
         }
       };
@@ -358,8 +356,7 @@ angular.module('totemDashboard')
           // All results are in the hits array.
           var events = _.chain(hits)
             .map(transformDeploymentHit)
-            .sortBy('startedAt')
-            .reverse()
+            .sortBy('date')
             .value();
 
           deferred.resolve({

@@ -63,36 +63,30 @@
   font-weight: bold;
 }
 
-.gantt-row-label {
-  padding-left: 10px;
-}
-
-.gantt-task-content {
-  color: white;
-  overflow: visible;
-  text-shadow:
-   -1px -1px 0 rgb(63,81,181),
-    1px -1px 0 rgb(63,81,181),
-    -1px 1px 0 rgb(63,81,181),
-     1px 1px 0 rgb(63,81,181);
-}
-
-.gantt-task-background {
-  background: rgb(63,81,181);
+.totem-event .gantt-task-background {
+  background: rgb(127, 178, 240);
 }
 
 .parent-row {
   background: rgba(121,134,203, .5);
-  color: white;
+}
+
+.gantt-task-content {
+  line-height: 22px;
+  overflow: visible;
 }
 
 .overview-task {
   height: 30%;
 
-
   .gantt-task-background {
-    background: rgb(255, 64, 129);
+    background: rgb(171, 200, 164);
     border-radius: 0;
+  }
+
+  // Offset the content top to compensate the border size
+  .gantt-task-content {
+    top: -7px;
   }
 
   &:first-child:before,
@@ -108,26 +102,14 @@
   }
 
   &:first-child:before {
-    border-left-color: rgb(255, 64, 129);
+    border-left-color: rgb(171, 200, 164);
     left: 0;
   }
 
   &:last-child:after {
-    border-right-color: rgb(255, 64, 129);
+    border-right-color: rgb(171, 200, 164);
     right: 0;
   }
-}
-
-md-tabs {
-  height: calc(100vh - 128px);
-}
-
-md-tab-content {
-  background: white;
-}
-
-md-ink-bar {
-  top: 0;
 }
 
 md-fab-speed-dial {
@@ -144,4 +126,48 @@ md-fab-speed-dial {
 
 tr[role=button] {
   cursor: pointer;
+}
+
+md-card.totem-app {
+  cursor: pointer;
+
+  md-card-title {
+    -webkit-flex-direction: column;
+    flex-direction: column;
+  }
+}
+
+.branch-menu {
+  cursor: pointer;
+}
+
+.spaced-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  td {
+    padding: 4px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+  }
+
+  td:first-child {
+    padding-left: 10px;
+  }
+}
+
+.application-view {
+  padding-bottom: 120px;
+}
+
+.message-warn {
+  color: rgb(255,87,34);
+}
+
+.shifted-down {
+  margin-top: 20px;
+}
+
+#loading-bar .bar {
+  height: 3px;
+  background: rgb(255,87,34);
 }

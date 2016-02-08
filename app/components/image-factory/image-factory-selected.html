@@ -1,28 +1,40 @@
-<md-content class="md-whiteframe-1dp" layout-margin="5">
-  <div layout="column" flex="" layout-fill="" layout-padding="5">
-    <div>
-      image: {{ job.image }}
+<md-content class="md-whiteframe-1dp" layout-margin="5" layout-padding="5">
+  <div layout="row" layout-wrap>
+    <div layout="column" flex="75" layout-fill="">
+      <div>
+        <strong>image</strong>
+        <a ng-if="job.imageLink" ng-href="{{job.imageLink}}" target="_blank">{{ job.image }}</a>
+        <span ng-if="!job.imageLink">{{ job.image }}</span>
+      </div>
+      <div>
+        <strong>repository</strong> <a href="https://github.com/{{job.context.owner}}/{{job.context.repo}}">{{job.context.owner}}/{{job.context.repo}}</a> - <a href="https://github.com/{{job.context.owner}}/{{job.context.repo}}/tree/{{job.context.branch}}">{{job.context.branch}}</a> - <a href="https://github.com/{{job.context.owner}}/{{job.context.repo}}/commit/{{job.context.commit}}">{{job.context.commit}}</a>
+      </div>
+      <div class="shifted-down">
+        <p>started <a ng-alt="{{ job.startMoment | ago }}">{{ job.startMoment | ago }}<md-tooltip>{{ job.startTime | date:'medium' }}</md-tooltip></a> and 
+        <span ng-if="!job.duration">
+          it's been <strong>{{ job.status }}</strong> for {{ job.startMoment | humanizeTimeDiff }}.
+        </span>
+        <span ng-if="job.duration">
+          it took <a ng-alt="{{ job.duration | humanizeTimeDiff }}">{{ job.duration | humanizeTimeDiff }}<md-tooltip>{{ job.duration }}</md-tooltip></a> to be a <strong>{{ job.status }}</strong>.
+        </span>
+        </p>
+      </div>
     </div>
-    <div>
-      repository: <a href="https://github.com/{{job.context.owner}}/{{job.context.repo}}">{{job.context.owner}}/{{job.context.repo}}</a> - <a href="https://github.com/{{job.context.owner}}/{{job.context.repo}}/tree/{{job.context.branch}}">{{job.context.branch}}</a> - <a href="https://github.com/{{job.context.owner}}/{{job.context.repo}}/commit/{{job.context.commit}}">{{job.context.commit}}</a>
-    </div>
-  </div>
-  <div layout="row" flex="" layout-fill="" layout-padding="5">
-    <div>
-      status: {{ job.status }}
-    </div>
-    <div>
-      started: {{ job.startMoment | ago }}
-    </div>
-    <div>
-      ended: {{ job.endMoment | ago }}
+    <div flex="25" layout="column">
+      <table class="spaced-table">
+        <tr ng-repeat="stage in stages">
+          <td>{{ stage }}</td>
+          <td>{{ job.results[stage].status }}</td>
+        </tr>
+      </table>
     </div>
   </div>
 </md-content>
 <md-content class="md-whiteframe-1dp" layout-margin="5" layout-padding="5">
-  <p>
-    Logs
-    <md-button ng-click="loadLogs()" class="md-raised">Refresh</md-button>
+  <md-button ng-click="loadLogs()" class="md-raised">Refresh Logs</md-button>
+
+  <p ng-if="!logs" class="md-body-2 message-warn">
+    <strong>No logs found for this build.</strong>
   </p>
 
   <log></log>

@@ -2,11 +2,18 @@
 'use strict';
 
 angular.module('totemDashboard')
-  .service('configService', ['$window', '$http', '$q', 'totemConfigUrl', function ($window, $http, $q, totemConfigUrl) {
+  .service('configService', ['$window', '$log', '$http', '$q', 'totemConfigUrl', function ($window, $log, $http, $q, totemConfigUrl) {
     var self = this;
 
     this.get = function () {
       var deferred = $q.defer();
+
+      if (!totemConfigUrl) {
+        $log.error('No configuration URL set, see config.service for details.', totemConfigUrl);
+        deferred.reject('No configuration URL set. Please let someone know, or look in the console logs.');
+
+        return deferred.promise;
+      }
 
       try {
         this.settings = angular.fromJson($window.sessionStorage.getItem('totem.dashboard.config'));

@@ -1,0 +1,86 @@
+<md-content class="md-padding" layout="column">
+  <table class="mdl-data-table mdl-js-data-table" width="100%" ng-if="selected.deployment">
+    <thead>
+      <tr>
+        <th class="mdl-data-table__cell--non-numeric">Host</th>
+        <th class="mdl-data-table__cell--non-numeric">Path</th>
+        <th class="mdl-data-table__cell--non-numeric">Port</th>
+        <th class="mdl-data-table__cell--non-numeric">Access</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr ng-repeat="location in selected.deployment._locations">
+        <td class="mdl-data-table__cell--non-numeric">
+          <a ng-href="{{ location.url }}" target="_blank">{{ location.hostname }}</a>
+        </td>
+        <td class="mdl-data-table__cell--non-numeric">
+          <a ng-href="{{ location.url }}" target="_blank">{{ location.path }}</a>
+        </td>
+        <td class="mdl-data-table__cell--non-numeric">{{ location.port }}</td>
+        <td class="mdl-data-table__cell--non-numeric">
+          <a>
+            <md-tooltip>{{ location.acls }}</md-tooltip>
+            <md-icon ng-if="location.isPublic" class="material-icons">lock_open</md-icon>
+            <md-icon ng-if="!location.isPublic" class="material-icons">lock</md-icon>
+          </a>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div flex ng-if="events">
+    <h3>Events</h3>
+
+    <div gantt data="events" view-scale="ganttOptions.scale" from-date="ganttOptions.from" to-date="ganttOptions.to" headers="ganttOptions.headers">
+      <gantt-tree templateUrl="'/components/angular-gantt/plugins/tree/treeBodyChildren.tmpl.html'"></gantt-tree>
+    </div>
+  </div>
+
+  <div layout="row">
+    <div flex ng-repeat="node in selected.deployment.nodes" ng-if="selected.deployment">
+      <h4>Node {{ $index + 1 }}</h4>
+
+      <p>
+        <strong>Machine ID:</strong> {{ node.id }}<br />
+        <strong>Machine Address:</strong> {{ node.address }}
+      </p>
+
+      <h5>Units</h5>
+
+      <p ng-repeat="unit in node.units">
+        <strong>Unit:</strong> {{ unit.unit }}<br />
+        <strong>Active:</strong> {{ unit.active }}<br />
+        <strong>Status:</strong> {{ unit.sub }}<br />
+        <strong>Ports:</strong><span ng-repeat="(port, upstream) in unit.upstreams"> <a ng-href="http://{{ upstream.endpoint }}" target="_blank">{{ port }}</a></span>
+      </p>
+    </div>
+  </div>
+</md-content>
+
+<script type="text/ng-template" id="plugins/tree/treeBodyChildren.tmpl.html">
+  <div ng-controller="GanttTreeNodeController"
+       class="gantt-row-label gantt-row-height"
+       ng-class="row.model.classes"
+       ng-style="{'height': row.model.height}">
+      <div class="gantt-valign-container">
+          <div class="gantt-valign-content">
+              <a ng-hide="isCollapseDisabled()" ng-disabled="isCollapseDisabled()" data-nodrag
+                 class="gantt-tree-handle-button btn btn-xs"
+                 ng-class="{'gantt-tree-collapsed': collapsed, 'gantt-tree-expanded': !collapsed}"
+                 ng-click="!isCollapseDisabled() && toggle()"><span
+                  class="gantt-tree-handle glyphicon glyphicon-chevron-down"
+                  ng-class="{'gantt-tree-collapsed': collapsed, 'gantt-tree-expanded': !collapsed}">
+                    <md-icon ng-if="!collapsed" class="material-icons">keyboard_arrow_down</md-icon>
+                    <md-icon ng-if="collapsed" class="material-icons">chevron_right</md-icon>
+                  </span>
+              </a>
+              <span gantt-row-label class="gantt-label-text" gantt-bind-compile-html="getRowContent()"/>
+          </div>
+      </div>
+  </div>
+  <ol ui-tree-nodes ng-class="{hidden: collapsed}" ng-model="childrenRows">
+      <li ng-repeat="row in childrenRows" ui-tree-node>
+          <div ng-include="'plugins/tree/treeBodyChildren.tmpl.html'"></div>
+      </li>
+  </ol>
+</script>
