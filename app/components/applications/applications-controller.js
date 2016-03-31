@@ -48,6 +48,10 @@ angular.module('totemDashboard')
       }
     });
 
+  $scope.firstRef = function(app) {
+    return _.first(_.keys(app.refs).sort());
+  }
+
   $scope.changeState = function(eve, app, ref) {
     if (!ref) {
       ref = 'develop';
@@ -55,6 +59,10 @@ angular.module('totemDashboard')
       // if there's no develop, check for master
       if (app.refs && (!app.refs.develop && app.refs.master)) {
         ref = 'master';
+      }
+      else {
+        // If there's no master either, get the first ref based on sorted to provide deterministic behaviour.
+        ref = $scope.firstRef(app);
       }
     }
 

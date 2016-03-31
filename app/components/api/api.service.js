@@ -110,19 +110,6 @@ angular.module('totemDashboard')
 
       var body = {
         size: 1,
-        query: {
-          filtered: {
-            filter: {
-              bool: {
-                must: [{
-                  terms: {
-                    'meta-info.git.ref': filteredRefs
-                  }
-                }]
-              }
-            }
-          }
-        },
         aggregations: {
           owner: {
             terms: {

@@ -51,6 +51,9 @@
           <md-button ng-if="app.refs.develop" class="md-primary" ng-click="changeState($event, app, 'develop')">
             develop
           </md-button>
+          <md-button ng-if="!app.refs.develop" class="md-primary" ng-click="changeState($event, app, firstRef(app))">
+            {{ firstRef(app) }}
+          </md-button>
         </md-card-actions>
       </md-card>
     </div>
