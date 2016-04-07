@@ -57,7 +57,10 @@ angular.module('totemDashboard')
       url: config.imageFactory.url + '/job'
     }).then(function successCallback(response) {
         _.each(response.data, function(job) {
-          job.startMoment = moment(job.startTime);
+          
+          if(job.startTime) {
+            job.startMoment = moment(job.startTime);
+          }
 
           if (job.endTime) {
             job.endMoment = moment(job.endTime);
