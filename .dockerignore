@@ -3,3 +3,9 @@ dist
 .tmp
 .sass-cache
 app/bower
+.git*
+*.md
+*travis.yml
+*.jshint*
+e2e
+*.editorconfig
