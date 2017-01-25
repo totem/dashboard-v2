@@ -8,10 +8,12 @@ describe('Controller: config', function() {
       httpBackend;
 
   var settings = {
-    domain: 'totem-dashboard.dev',
     elasticsearch: {
       index: 'totem-production',
       url: 'elasticsearch.dev'
+    },
+    logs: {
+      url: 'wss://totem-production.dev/logs'
     }
   };
 
