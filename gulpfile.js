@@ -240,7 +240,7 @@ gulp.task('serve:test', ['config'], function() {
 gulp.task('serve:prod', ['config'], serve({
     root: ['dist'],
     port: 3000,
-    host: '0.0.0.0'
+    hostname: '0.0.0.0'
 }));
 
 // Default task
