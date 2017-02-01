@@ -359,17 +359,9 @@ angular.module('totemDashboard')
   }])
 
   .service('logs', ['config', '$websocket', function(config, $websocket) {
-    var cache = {};
-
     this.connect = function() {
-      var domain = config.domain;
-
-      // TODO: determine if we should cache the websocket handle or not
-      if (!cache[domain]) {
-        cache[domain] = 'wss://totem-logs.' + domain + '/logs';
-      }
-
-      return $websocket(cache[domain]);
+      var logUrl = config.logs.url;
+      return $websocket(logUrl);
     };
   }])
 ;
