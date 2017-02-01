@@ -1,6 +1,6 @@
 {
   "name": "totem-dashboard",
-  "version": "0.0.0",
+  "version": "0.3.0",
   "scripts": {
     "test": "./node_modules/.bin/gulp test && ./node_modules/.bin/gulp protractor:dist"
   },
