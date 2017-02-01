@@ -1,6 +1,6 @@
 {
-  "name": "totemDashboard",
-  "version": "0.0.0",
+  "name": "totem-dashboard",
+  "version": "0.3.0",
   "scripts": {
     "test": "./node_modules/.bin/gulp test && ./node_modules/.bin/gulp protractor:dist"
   },
@@ -33,7 +33,7 @@
     "protractor": "^2.1.0"
   },
   "engines": {
-    "node": ">=0.10.0"
+    "node": ">=6.9"
   },
   "dependencies": {}
 }

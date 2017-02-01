@@ -4,7 +4,7 @@
 
 ## Setup
 
-You need [Node.js](https://nodejs.org/) 0.10.x installed (use [nvm](https://github.com/creationix/nvm)).
+You need [Node.js](https://nodejs.org/) 6.9.x installed (use [nvm](https://github.com/creationix/nvm)).
 
 Once node is running, you will need [Gulp](http://gulpjs.com/) and [Bower](http://bower.io/) installed globally to run the project
 

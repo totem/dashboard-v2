@@ -1,5 +1,5 @@
 {
-  "name": "totemDashboard",
+  "name": "totem-dashboard",
   "version": "0.0.0",
   "dependencies": {
     "DateJS": "~1.0.0-rc3",
