@@ -204,11 +204,11 @@ angular.module('totemDashboard')
               bool: {
                 must: [{
                   term: {
-                    owner: owner
+                    'meta-info.git.owner': owner
                   }
                 }, {
                   term: {
-                    repo: repo
+                    'meta-info.git.repo': repo
                   }
                 }]
               }
